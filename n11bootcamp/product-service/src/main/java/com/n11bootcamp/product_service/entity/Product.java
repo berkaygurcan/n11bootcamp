@@ -63,18 +63,6 @@ public class Product {
     @Column(name = "category_key", length = 100)
     private String categoryKey;
 
-    @OneToMany(
-            mappedBy = "product",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    private List<ProductTranslation> translations = new ArrayList<>();
-
-    public void addTranslation(ProductTranslation t) {
-        t.setProduct(this);
-        this.translations.add(t);
-    }
 
     // ======================
     // getters/setters
@@ -111,8 +99,4 @@ public class Product {
     public String getCategoryKey() { return categoryKey; }
     public void setCategoryKey(String categoryKey) { this.categoryKey = categoryKey; }
 
-    public List<ProductTranslation> getTranslations() { return translations; }
-    public void setTranslations(List<ProductTranslation> translations) {
-        this.translations = translations;
-    }
 }

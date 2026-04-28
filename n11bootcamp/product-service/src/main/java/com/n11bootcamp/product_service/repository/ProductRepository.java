@@ -15,33 +15,9 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @EntityGraph(attributePaths = {"translations"})
-    Optional<Product> findById(Long id);
-
-    @EntityGraph(attributePaths = {"translations"})
-    List<Product> findAll();
-
-    @EntityGraph(attributePaths = {"translations"})
-    Page<Product> findAll(Pageable pageable);
-
     @Modifying
     @Query(value = "UPDATE public.product SET category_key = :newKey WHERE LOWER(TRIM(category_key)) = LOWER(TRIM(:oldKey))", nativeQuery = true)
     int updateCategoryKeyForProducts(@Param("oldKey") String oldKey, @Param("newKey") String newKey);
 
-    @EntityGraph(attributePaths = {"translations"})
-    @Query("""
-    select distinct p
-    from Product p
-    join p.translations t
-    where lower(t.lang) = lower(:lang)
-      and (
-        lower(coalesce(t.searchText,'')) like lower(concat('%', :q, '%'))
-        or lower(coalesce(t.title,'')) like lower(concat('%', :q, '%'))
-        or lower(coalesce(t.description,'')) like lower(concat('%', :q, '%'))
-        or lower(coalesce(t.tags,'')) like lower(concat('%', :q, '%'))
-      )
-    order by p.id desc
-""")
-    List<Product> searchI18n(@Param("lang") String lang, @Param("q") String q, Pageable pageable);
 
 }
