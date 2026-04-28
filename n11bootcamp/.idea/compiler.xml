@@ -9,6 +9,7 @@
         <module name="stock-service" />
         <module name="config-server" />
         <module name="discovery-server" />
+        <module name="payment-service" />
         <module name="api-gateway" />
         <module name="product-service" />
         <module name="user-service" />
@@ -23,6 +24,7 @@
       <module name="config-server" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
       <module name="order-service" options="-parameters" />
+      <module name="payment-service" options="-parameters" />
       <module name="product-service" options="-parameters" />
       <module name="shopping-cart-service" options="-parameters" />
       <module name="stock-service" options="-parameters" />
