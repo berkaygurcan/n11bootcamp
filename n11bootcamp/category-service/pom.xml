@@ -1,11 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 🔥 SPRING BOOT -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -14,35 +13,49 @@
     </parent>
 
     <groupId>com.n11bootcamp</groupId>
-    <artifactId>payment-service</artifactId>
+    <artifactId>category-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
         <java.version>21</java.version>
+        <!-- product ile aynı olsun -->
         <spring-cloud.version>2025.0.2</spring-cloud.version>
     </properties>
 
     <dependencies>
 
-        <!-- 🔥 RABBITMQ -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-
-        <!-- 🌐 WEB -->
+        <!-- Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- 🔍 EUREKA -->
+        <!-- JPA -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Config Server Client -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+
+        <!-- Eureka Client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
 
-        <!-- 🧪 TEST -->
+        <!-- PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -51,7 +64,7 @@
 
     </dependencies>
 
-    <!-- ☁️ SPRING CLOUD -->
+    <!-- Spring Cloud Version -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -64,7 +77,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- ⚙️ BUILD -->
     <build>
         <plugins>
             <plugin>
