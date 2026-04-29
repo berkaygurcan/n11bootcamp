@@ -110,9 +110,13 @@ public class ProductService {
     }
 
 
-    public Page<Product> getPaged(int page, int size) {
+    public Page<Product> getPaged(int page, int size, String sortBy, String direction) {
+        Sort.Direction sortDirection = "asc".equalsIgnoreCase(direction)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
         return productRepository.findAll(
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))
+                PageRequest.of(page, size, Sort.by(sortDirection, sortBy))
         );
     }
 

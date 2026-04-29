@@ -54,15 +54,18 @@ public class ProductController {
     @GetMapping("/paged")
     public ResponseEntity<?> getPaged(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "4") int size
+            @RequestParam(defaultValue = "4") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
     ) {
-        Page<Product> p = productService.getPaged(page, size);
+        Page<Product> p = productService.getPaged(page, size, sortBy, direction);
         return ResponseEntity.ok(Map.of(
                 "items", p.getContent(),
                 "page", p.getNumber(),
                 "size", p.getSize(),
                 "totalElements", p.getTotalElements(),
                 "totalPages", p.getTotalPages(),
+                "isFirst", p.isFirst(),
                 "isLast", p.isLast()
         ));
     }
