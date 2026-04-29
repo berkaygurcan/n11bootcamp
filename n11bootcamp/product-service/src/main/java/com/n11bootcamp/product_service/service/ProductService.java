@@ -1,6 +1,6 @@
 package com.n11bootcamp.product_service.service;
 
-
+import com.n11bootcamp.product_service.dto.CategoryResponse;
 import com.n11bootcamp.product_service.entity.Product;
 import com.n11bootcamp.product_service.repository.ProductRepository;
 import org.slf4j.Logger;
@@ -11,13 +11,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -25,13 +27,36 @@ public class ProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductService.class);
 
     private final ProductRepository productRepository;
+    private final RestTemplate restTemplate;
 
-    // ✅ constructor injection (çalışanları bozmaz)
-    public ProductService(ProductRepository productRepository) {
+    // 🔥 constructor injection
+    public ProductService(ProductRepository productRepository,
+                          RestTemplate restTemplate) {
         this.productRepository = productRepository;
+        this.restTemplate = restTemplate;
     }
 
-    // ------------------ MEVCUT METODLAR (korundu) ------------------
+    // ------------------ CATEGORY VALIDATION ------------------
+
+    public CategoryResponse validateCategory(String categoryKey) {
+        if (categoryKey == null || categoryKey.isBlank()) {
+            throw new RuntimeException("Category key is required!");
+        }
+
+        String url = "http://localhost:8763/api/categories/" + categoryKey;
+
+        try {
+            CategoryResponse category = restTemplate.getForObject(url, CategoryResponse.class);
+            if (category == null) {
+                throw new RuntimeException("Category not found!");
+            }
+            return category;
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new RuntimeException("Category not found!");
+        } catch (Exception e) {
+            throw new RuntimeException("Category service error!");
+        }
+    }
 
     public ResponseEntity<Product> getProductById(Long productId) {
         Product product = productRepository.findById(productId)
@@ -44,7 +69,12 @@ public class ProductService {
         return ResponseEntity.ok(productList);
     }
 
+    // 🔥 CREATE (VALIDATION EKLENDİ)
     public ResponseEntity<Product> createProduct(Product product) {
+
+        CategoryResponse category = validateCategory(product.getCategoryKey());
+        product.setCategory(category.getName());
+
         return ResponseEntity.ok().body(productRepository.save(product));
     }
 
@@ -52,14 +82,14 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found in DB"));
 
-        // ⚠️ Yeni şemada title/category/description product'ta yok.
-        // Sadece mevcut alanları güncelliyoruz:
         product.setImg(updatedProduct.getImg());
         product.setPrice(updatedProduct.getPrice());
         product.setLabels(updatedProduct.getLabels());
         product.setBrand(updatedProduct.getBrand());
         product.setColor(updatedProduct.getColor());
+        CategoryResponse category = validateCategory(updatedProduct.getCategoryKey());
         product.setCategoryKey(updatedProduct.getCategoryKey());
+        product.setCategory(category.getName());
 
         productRepository.save(product);
         return ResponseEntity.ok(product);
@@ -79,18 +109,6 @@ public class ProductService {
         return ResponseEntity.ok("All products deleted successfully");
     }
 
-    // --- resim upload (korundu) ---
-    public Product uploadImage(Long id, MultipartFile file) throws Exception {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Path filepath = Paths.get("./images/products/", filename);
-        Files.copy(file.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
-
-        product.setImg(filename);
-        return productRepository.save(product);
-    }
 
     public Page<Product> getPaged(int page, int size) {
         return productRepository.findAll(
@@ -111,6 +129,4 @@ public class ProductService {
             log.error("Failed to update product categoryKeys for '{}' -> '{}': {}", oldKey, newKey, ex.getMessage(), ex);
         }
     }
-
-
 }
