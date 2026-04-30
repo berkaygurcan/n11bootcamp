@@ -2,6 +2,7 @@ package com.n11bootcamp.payment_service.listener;
 
 import com.n11bootcamp.payment_service.event.PaymentFailedEvent;
 import com.n11bootcamp.payment_service.event.PaymentSuccessEvent;
+import com.n11bootcamp.payment_service.service.IyzicoPaymentClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -18,9 +19,12 @@ public class PaymentListener {
     private static final Logger log = LoggerFactory.getLogger(PaymentListener.class);
 
     private final RabbitTemplate rabbitTemplate;
+    private final IyzicoPaymentClient iyzicoPaymentClient;
 
-    public PaymentListener(RabbitTemplate rabbitTemplate) {
+    public PaymentListener(RabbitTemplate rabbitTemplate,
+                           IyzicoPaymentClient iyzicoPaymentClient) {
         this.rabbitTemplate = rabbitTemplate;
+        this.iyzicoPaymentClient = iyzicoPaymentClient;
     }
 
     @RabbitListener(queues = "payment.queue")
@@ -44,9 +48,9 @@ public class PaymentListener {
                                 * Integer.parseInt(item.get("quantity").toString()))
                 .sum();
 
-        boolean success = totalPrice <= 100000;
+        PaymentResult paymentResult = processPayment(orderId, username, items, totalPrice);
 
-        if (success) {
+        if (paymentResult.success()) {
 
             PaymentSuccessEvent e = new PaymentSuccessEvent();
             e.setOrderId(orderId);
@@ -63,20 +67,59 @@ public class PaymentListener {
 
         } else {
 
-            PaymentFailedEvent e = new PaymentFailedEvent();
-            e.setOrderId(orderId);
-            e.setUsername(username);
-            e.setReason("Basket total is over 100000 TL");
-            e.setItems(items);
-
-            rabbitTemplate.convertAndSend(
-                    "order.exchange",
-                    "payment.failed",
-                    e
-            );
-
-            log.warn("PAYMENT_FAILED orderId={} username={} reason=Basket total is over 100000 TL totalPrice={}",
-                    orderId, username, totalPrice);
+            publishPaymentFailed(orderId, username, items, paymentResult.reason(), totalPrice);
         }
+    }
+
+    private PaymentResult processPayment(Long orderId,
+                                         String username,
+                                         List<Map<String, Object>> items,
+                                         double totalPrice) {
+        if (iyzicoPaymentClient.isConfigured()) {
+            try {
+                log.info("IYZICO_PAYMENT_STARTED orderId={} username={}", orderId, username);
+                IyzicoPaymentClient.IyzicoPaymentResult result =
+                        iyzicoPaymentClient.pay(orderId, username, items);
+                log.info("IYZICO_PAYMENT_RESULT orderId={} username={} success={} reason={}",
+                        orderId, username, result.success(), result.reason());
+                return new PaymentResult(result.success(), result.reason());
+            } catch (Exception exception) {
+                log.warn("IYZICO_PAYMENT_ERROR orderId={} username={} error={}",
+                        orderId, username, exception.getMessage());
+                return new PaymentResult(false, "Iyzico payment error: " + exception.getMessage());
+            }
+        }
+
+        log.info("MOCK_PAYMENT_STARTED orderId={} username={} totalPrice={}", orderId, username, totalPrice);
+
+        if (totalPrice > 100000) {
+            return new PaymentResult(false, "Basket total is over 100000 TL");
+        }
+
+        return new PaymentResult(true, null);
+    }
+
+    private void publishPaymentFailed(Long orderId,
+                                      String username,
+                                      List<Map<String, Object>> items,
+                                      String reason,
+                                      double totalPrice) {
+        PaymentFailedEvent e = new PaymentFailedEvent();
+        e.setOrderId(orderId);
+        e.setUsername(username);
+        e.setReason(reason);
+        e.setItems(items);
+
+        rabbitTemplate.convertAndSend(
+                "order.exchange",
+                "payment.failed",
+                e
+        );
+
+        log.warn("PAYMENT_FAILED orderId={} username={} reason={} totalPrice={}",
+                orderId, username, reason, totalPrice);
+    }
+
+    private record PaymentResult(boolean success, String reason) {
     }
 }

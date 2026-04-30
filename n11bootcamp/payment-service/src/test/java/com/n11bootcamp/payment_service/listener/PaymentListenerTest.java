@@ -2,6 +2,7 @@ package com.n11bootcamp.payment_service.listener;
 
 import com.n11bootcamp.payment_service.event.PaymentFailedEvent;
 import com.n11bootcamp.payment_service.event.PaymentSuccessEvent;
+import com.n11bootcamp.payment_service.service.IyzicoPaymentClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -25,9 +26,12 @@ class PaymentListenerTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
+    @Mock
+    private IyzicoPaymentClient iyzicoPaymentClient;
+
     @Test
     void stockReservedShouldPublishPaymentSuccessEvent() {
-        PaymentListener listener = new PaymentListener(rabbitTemplate);
+        PaymentListener listener = new PaymentListener(rabbitTemplate, iyzicoPaymentClient);
 
         listener.handle(payload(), "stock.reserved");
 
@@ -42,7 +46,7 @@ class PaymentListenerTest {
 
     @Test
     void otherRoutingKeysShouldBeIgnored() {
-        PaymentListener listener = new PaymentListener(rabbitTemplate);
+        PaymentListener listener = new PaymentListener(rabbitTemplate, iyzicoPaymentClient);
 
         listener.handle(payload(), "order.created");
 
@@ -51,7 +55,7 @@ class PaymentListenerTest {
 
     @Test
     void stockReservedShouldPublishPaymentFailedEventWhenBasketTotalIsOverLimit() {
-        PaymentListener listener = new PaymentListener(rabbitTemplate);
+        PaymentListener listener = new PaymentListener(rabbitTemplate, iyzicoPaymentClient);
 
         listener.handle(payload(3), "stock.reserved");
 
