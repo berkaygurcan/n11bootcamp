@@ -1,6 +1,7 @@
 package com.n11bootcamp.order_service.listener;
 
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import com.n11bootcamp.order_service.entity.OrderStatus;
+import com.n11bootcamp.order_service.repository.OrderRepository;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,12 @@ import java.util.Map;
 @Component
 public class PaymentResultListener {
 
-    @RabbitListener(queues = "order.queue")
+    private final OrderRepository orderRepository;
+
+    public PaymentResultListener(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+
     public void listen(Map<String, Object> payload,
                        @Header("amqp_receivedRoutingKey") String routingKey) {
 
@@ -20,15 +26,21 @@ public class PaymentResultListener {
         String username = payload.get("username").toString();
 
         if ("payment.success".equals(routingKey)) {
-            System.out.println("✅ PAYMENT SUCCESS → " + orderId);
+            orderRepository.findById(orderId).ifPresent(order -> {
+                order.setStatus(OrderStatus.COMPLETED);
+                orderRepository.save(order);
+            });
 
-            // TODO: order status CONFIRMED yap
+            System.out.println("✅ PAYMENT SUCCESS → " + orderId);
         }
 
         else if ("payment.failed".equals(routingKey)) {
-            System.out.println("❌ PAYMENT FAILED → " + orderId);
+            orderRepository.findById(orderId).ifPresent(order -> {
+                order.setStatus(OrderStatus.CANCELLED);
+                orderRepository.save(order);
+            });
 
-            // TODO: order status CANCELLED yap
+            System.out.println("❌ PAYMENT FAILED → " + orderId);
         }
 
         else {

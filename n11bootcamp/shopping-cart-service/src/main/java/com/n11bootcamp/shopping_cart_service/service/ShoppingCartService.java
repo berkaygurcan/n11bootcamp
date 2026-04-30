@@ -2,6 +2,7 @@ package com.n11bootcamp.shopping_cart_service.service;
 
 import java.util.*;
 
+import com.n11bootcamp.shopping_cart_service.entity.CartItem;
 import com.n11bootcamp.shopping_cart_service.entity.Product;
 import com.n11bootcamp.shopping_cart_service.entity.ShoppingCart;
 import com.n11bootcamp.shopping_cart_service.repository.ProductRepository;
@@ -83,6 +84,74 @@ public class ShoppingCartService {
         return ResponseEntity.ok().body(shoppingCartRepository.save(shoppingCart));
     }
 
+    public ResponseEntity<ShoppingCart> addItem(Long shoppingCartId, Map<String, Object> itemRequest) {
+        ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
+                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+
+        Long productId = Long.valueOf(itemRequest.get("productId").toString());
+        String productName = itemRequest.get("productName").toString();
+        Double price = Double.valueOf(itemRequest.get("price").toString());
+        Integer quantity = Integer.valueOf(itemRequest.getOrDefault("quantity", 1).toString());
+
+        List<CartItem> items = shoppingCart.getItems();
+        if (items == null) {
+            items = new ArrayList<>();
+            shoppingCart.setItems(items);
+        }
+
+        Optional<CartItem> existingItem = items.stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst();
+
+        if (existingItem.isPresent()) {
+            CartItem item = existingItem.get();
+            item.setQuantity(item.getQuantity() + quantity);
+            item.setProductName(productName);
+            item.setPrice(price);
+        } else {
+            CartItem item = new CartItem();
+            item.setProductId(productId);
+            item.setProductName(productName);
+            item.setPrice(price);
+            item.setQuantity(quantity);
+            item.setShoppingCart(shoppingCart);
+            items.add(item);
+        }
+
+        return ResponseEntity.ok(shoppingCartRepository.save(shoppingCart));
+    }
+
+    public ResponseEntity<ShoppingCart> updateItemQuantity(Long shoppingCartId,
+                                                           Long productId,
+                                                           Map<String, Object> itemRequest) {
+        ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
+                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+
+        Integer quantity = Integer.valueOf(itemRequest.get("quantity").toString());
+
+        if (quantity < 1) {
+            return removeItem(shoppingCartId, productId);
+        }
+
+        shoppingCart.getItems().stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst()
+                .ifPresent(item -> item.setQuantity(quantity));
+
+        return ResponseEntity.ok(shoppingCartRepository.save(shoppingCart));
+    }
+
+    public ResponseEntity<ShoppingCart> removeItem(Long shoppingCartId, Long productId) {
+        ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
+                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+
+        if (shoppingCart.getItems() != null) {
+            shoppingCart.getItems().removeIf(item -> item.getProductId().equals(productId));
+        }
+
+        return ResponseEntity.ok(shoppingCartRepository.save(shoppingCart));
+    }
+
     public ResponseEntity<ShoppingCart> removeProduct(Long shoppingCartId, Long productId) {
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
                 .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
@@ -106,6 +175,16 @@ public class ShoppingCartService {
 
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
                 .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+
+        if (shoppingCart.getItems() != null && !shoppingCart.getItems().isEmpty()) {
+            double totalPrice = shoppingCart.getItems()
+                    .stream()
+                    .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                    .sum();
+
+            response.put("total_price", Double.toString(totalPrice));
+            return ResponseEntity.ok().body(response);
+        }
 
         int totalPrice = shoppingCart.getProducts()
                 .stream()

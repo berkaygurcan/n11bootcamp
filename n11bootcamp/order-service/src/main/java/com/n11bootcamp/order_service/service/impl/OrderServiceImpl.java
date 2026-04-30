@@ -90,6 +90,7 @@ public class OrderServiceImpl implements OrderService {
         response.setOrderId(saved.getId());
         response.setUsername(saved.getUsername());
         response.setStatus(saved.getStatus().name());
+        response.setFailureReason(saved.getFailureReason());
         response.setTotalPrice(saved.getTotalPrice());
 
         response.setItems(saved.getItems().stream().map(i -> {
@@ -111,6 +112,7 @@ public class OrderServiceImpl implements OrderService {
             res.setOrderId(order.getId());
             res.setUsername(order.getUsername());
             res.setStatus(order.getStatus().name());
+            res.setFailureReason(order.getFailureReason());
             res.setTotalPrice(order.getTotalPrice());
             return res;
         }).collect(Collectors.toList());

@@ -1,5 +1,7 @@
 package com.n11bootcamp.order_service.listener;
 
+import com.n11bootcamp.order_service.entity.OrderStatus;
+import com.n11bootcamp.order_service.repository.OrderRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.handler.annotation.Header;
@@ -11,9 +13,12 @@ import java.util.Map;
 public class StockResultListener {
 
     private final RabbitTemplate rabbitTemplate;
+    private final OrderRepository orderRepository;
 
-    public StockResultListener(RabbitTemplate rabbitTemplate) {
+    public StockResultListener(RabbitTemplate rabbitTemplate,
+                               OrderRepository orderRepository) {
         this.rabbitTemplate = rabbitTemplate;
+        this.orderRepository = orderRepository;
     }
 
     @RabbitListener(queues = "order.queue")
@@ -38,7 +43,35 @@ public class StockResultListener {
 
         else if ("stock.failed".equals(key)) {
 
+            orderRepository.findById(orderId).ifPresent(order -> {
+                order.setStatus(OrderStatus.CANCELLED);
+                order.setFailureReason("STOCK_FAILED");
+                orderRepository.save(order);
+            });
+
             System.out.println("STOCK FAILED → ORDER CANCELLED → " + orderId);
+        }
+
+        else if ("payment.success".equals(key)) {
+
+            orderRepository.findById(orderId).ifPresent(order -> {
+                order.setStatus(OrderStatus.COMPLETED);
+                order.setFailureReason(null);
+                orderRepository.save(order);
+            });
+
+            System.out.println("PAYMENT SUCCESS → ORDER COMPLETED → " + orderId);
+        }
+
+        else if ("payment.failed".equals(key)) {
+
+            orderRepository.findById(orderId).ifPresent(order -> {
+                order.setStatus(OrderStatus.CANCELLED);
+                order.setFailureReason("PAYMENT_FAILED");
+                orderRepository.save(order);
+            });
+
+            System.out.println("PAYMENT FAILED → ORDER CANCELLED → " + orderId);
         }
     }
 }

@@ -23,6 +23,20 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Binding stockReservedBinding() {
+        return BindingBuilder.bind(orderQueue())
+                .to(exchange())
+                .with("stock.reserved");
+    }
+
+    @Bean
+    public Binding stockFailedBinding() {
+        return BindingBuilder.bind(orderQueue())
+                .to(exchange())
+                .with("stock.failed");
+    }
+
+    @Bean
     public Binding successBinding() {
         return BindingBuilder.bind(orderQueue())
                 .to(exchange())

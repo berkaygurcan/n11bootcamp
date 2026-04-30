@@ -30,6 +30,28 @@ public class ShoppingCartController {
         return shoppingCartService.addProducts(shoppingCartId, products);
     }
 
+    @PostMapping("/{id}/items")
+    public ResponseEntity<ShoppingCart> addItemToCart(
+            @PathVariable("id") Long shoppingCartId,
+            @RequestBody Map<String, Object> item) {
+        return shoppingCartService.addItem(shoppingCartId, item);
+    }
+
+    @PutMapping("/{id}/items/{productId}")
+    public ResponseEntity<ShoppingCart> updateItemQuantity(
+            @PathVariable("id") Long shoppingCartId,
+            @PathVariable("productId") Long productId,
+            @RequestBody Map<String, Object> item) {
+        return shoppingCartService.updateItemQuantity(shoppingCartId, productId, item);
+    }
+
+    @DeleteMapping("/{id}/items/{productId}")
+    public ResponseEntity<ShoppingCart> removeItem(
+            @PathVariable("id") Long shoppingCartId,
+            @PathVariable("productId") Long productId) {
+        return shoppingCartService.removeItem(shoppingCartId, productId);
+    }
+
     @DeleteMapping("/{id}/products/{productId}")
     public ResponseEntity<ShoppingCart> removeProduct(
             @PathVariable("id") Long shoppingCartId,

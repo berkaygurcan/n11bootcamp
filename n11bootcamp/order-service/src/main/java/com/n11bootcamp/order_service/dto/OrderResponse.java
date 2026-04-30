@@ -8,6 +8,7 @@ public class OrderResponse {
     private String username;
     private Double totalPrice;
     private String status;
+    private String failureReason;
     private List<Item> items;
 
     public Long getOrderId() { return orderId; }
@@ -21,6 +22,9 @@ public class OrderResponse {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getFailureReason() { return failureReason; }
+    public void setFailureReason(String failureReason) { this.failureReason = failureReason; }
 
     public List<Item> getItems() { return items; }
     public void setItems(List<Item> items) { this.items = items; }

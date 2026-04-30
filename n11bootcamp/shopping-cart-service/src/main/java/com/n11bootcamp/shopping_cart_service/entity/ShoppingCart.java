@@ -1,5 +1,7 @@
 package com.n11bootcamp.shopping_cart_service.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -10,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 
 @Entity
 public class ShoppingCart {
@@ -50,6 +54,9 @@ public class ShoppingCart {
     )
     private Set<Product> products;
 
+    @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartItem> items = new ArrayList<>();
+
     // -------------------- GETTER & SETTER --------------------
 
     public long getId() {
@@ -71,5 +78,15 @@ public class ShoppingCart {
     }
     public void setProducts(Set<Product> products) {
         this.products = products;
+    }
+
+    public List<CartItem> getItems() {
+        return items;
+    }
+    public void setItems(List<CartItem> items) {
+        this.items = items;
+        if (items != null) {
+            items.forEach(item -> item.setShoppingCart(this));
+        }
     }
 }
