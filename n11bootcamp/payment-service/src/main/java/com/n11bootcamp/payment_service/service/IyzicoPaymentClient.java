@@ -60,13 +60,16 @@ public class IyzicoPaymentClient {
         return StringUtils.hasText(apiKey) && StringUtils.hasText(secretKey);
     }
 
-    public IyzicoPaymentResult pay(Long orderId, String username, List<Map<String, Object>> items) {
+    public IyzicoPaymentResult pay(Long orderId,
+                                   String username,
+                                   List<Map<String, Object>> items,
+                                   Map<String, Object> paymentCardPayload) {
         if (!isConfigured()) {
             return new IyzicoPaymentResult(false, "Iyzico is not configured");
         }
 
         BigDecimal totalPrice = calculateTotal(items);
-        CreatePaymentRequest request = createRequest(orderId, username, items, totalPrice);
+        CreatePaymentRequest request = createRequest(orderId, username, items, totalPrice, paymentCardPayload);
         log.info("IYZICO_REQUEST_CREATED orderId={} username={} totalPrice={} itemCount={}",
                 orderId, username, totalPrice, items.size());
 
@@ -87,7 +90,8 @@ public class IyzicoPaymentClient {
     private CreatePaymentRequest createRequest(Long orderId,
                                                String username,
                                                List<Map<String, Object>> items,
-                                               BigDecimal totalPrice) {
+                                               BigDecimal totalPrice,
+                                               Map<String, Object> paymentCardPayload) {
         CreatePaymentRequest request = new CreatePaymentRequest();
         request.setLocale(Locale.TR.getValue());
         request.setConversationId(orderId.toString());
@@ -98,7 +102,7 @@ public class IyzicoPaymentClient {
         request.setBasketId("ORDER-" + orderId);
         request.setPaymentChannel(PaymentChannel.WEB.name());
         request.setPaymentGroup(PaymentGroup.PRODUCT.name());
-        request.setPaymentCard(paymentCard());
+        request.setPaymentCard(paymentCard(paymentCardPayload));
         request.setBuyer(buyer(username));
 
         Address address = address(username);
@@ -116,15 +120,23 @@ public class IyzicoPaymentClient {
         return options;
     }
 
-    private PaymentCard paymentCard() {
+    private PaymentCard paymentCard(Map<String, Object> paymentCardPayload) {
         PaymentCard paymentCard = new PaymentCard();
-        paymentCard.setCardHolderName(cardHolderName);
-        paymentCard.setCardNumber(cardNumber);
-        paymentCard.setExpireMonth(expireMonth);
-        paymentCard.setExpireYear(expireYear);
-        paymentCard.setCvc(cvc);
+        paymentCard.setCardHolderName(valueOrDefault(paymentCardPayload, "cardHolderName", cardHolderName));
+        paymentCard.setCardNumber(valueOrDefault(paymentCardPayload, "cardNumber", cardNumber));
+        paymentCard.setExpireMonth(valueOrDefault(paymentCardPayload, "expireMonth", expireMonth));
+        paymentCard.setExpireYear(valueOrDefault(paymentCardPayload, "expireYear", expireYear));
+        paymentCard.setCvc(valueOrDefault(paymentCardPayload, "cvc", cvc));
         paymentCard.setRegisterCard(0);
         return paymentCard;
+    }
+
+    private String valueOrDefault(Map<String, Object> payload, String key, String defaultValue) {
+        if (payload == null || payload.get(key) == null || !StringUtils.hasText(payload.get(key).toString())) {
+            return defaultValue;
+        }
+
+        return payload.get(key).toString();
     }
 
     private Buyer buyer(String username) {

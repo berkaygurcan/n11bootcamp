@@ -67,6 +67,7 @@ public class OrderServiceImpl implements OrderService {
         event.setOrderId(saved.getId());
         event.setUsername(saved.getUsername());
         event.setTotalPrice(saved.getTotalPrice());
+        event.setPaymentCard(toPaymentCardEvent(request.getPaymentCard()));
 
 // items map
         List<OrderCreatedEvent.OrderItem> itemsEvent = saved.getItems().stream().map(i -> {
@@ -108,6 +109,20 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList()));
 
         return response;
+    }
+
+    private OrderCreatedEvent.PaymentCard toPaymentCardEvent(CreateOrderRequest.PaymentCardDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        OrderCreatedEvent.PaymentCard paymentCard = new OrderCreatedEvent.PaymentCard();
+        paymentCard.setCardHolderName(dto.getCardHolderName());
+        paymentCard.setCardNumber(dto.getCardNumber());
+        paymentCard.setExpireMonth(dto.getExpireMonth());
+        paymentCard.setExpireYear(dto.getExpireYear());
+        paymentCard.setCvc(dto.getCvc());
+        return paymentCard;
     }
 
     @Override

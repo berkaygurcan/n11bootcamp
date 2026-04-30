@@ -58,6 +58,7 @@ class OrderServiceImplTest {
         assertThat(event.getUsername()).isEqualTo("demo");
         assertThat(event.getTotalPrice()).isEqualTo(100000.0);
         assertThat(event.getItems()).hasSize(1);
+        assertThat(event.getPaymentCard().getCardNumber()).isEqualTo("5528790000000008");
     }
 
     private CreateOrderRequest orderRequest() {
@@ -70,6 +71,17 @@ class OrderServiceImplTest {
         CreateOrderRequest request = new CreateOrderRequest();
         request.setUsername("demo");
         request.setItems(List.of(item));
+        request.setPaymentCard(paymentCard());
         return request;
+    }
+
+    private CreateOrderRequest.PaymentCardDto paymentCard() {
+        CreateOrderRequest.PaymentCardDto paymentCard = new CreateOrderRequest.PaymentCardDto();
+        paymentCard.setCardHolderName("John Doe");
+        paymentCard.setCardNumber("5528790000000008");
+        paymentCard.setExpireMonth("12");
+        paymentCard.setExpireYear("2030");
+        paymentCard.setCvc("123");
+        return paymentCard;
     }
 }

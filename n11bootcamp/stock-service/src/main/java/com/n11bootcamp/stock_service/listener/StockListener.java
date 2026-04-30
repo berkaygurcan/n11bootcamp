@@ -65,6 +65,7 @@ public class StockListener {
             e.setOrderId(orderId);
             e.setUsername(username);
             e.setItems(items);
+            e.setPaymentCard((Map<String, Object>) payload.get("paymentCard"));
 
             rabbitTemplate.convertAndSend(
                     "order.exchange",

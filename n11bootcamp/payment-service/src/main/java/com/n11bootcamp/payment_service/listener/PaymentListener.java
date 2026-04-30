@@ -39,6 +39,7 @@ public class PaymentListener {
         Long orderId = Long.valueOf(payload.get("orderId").toString());
         String username = payload.get("username").toString();
         List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
+        Map<String, Object> paymentCard = (Map<String, Object>) payload.get("paymentCard");
 
         log.info("PAYMENT_STARTED orderId={} username={} itemCount={}", orderId, username, items.size());
 
@@ -48,7 +49,7 @@ public class PaymentListener {
                                 * Integer.parseInt(item.get("quantity").toString()))
                 .sum();
 
-        PaymentResult paymentResult = processPayment(orderId, username, items, totalPrice);
+        PaymentResult paymentResult = processPayment(orderId, username, items, paymentCard, totalPrice);
 
         if (paymentResult.success()) {
 
@@ -74,12 +75,13 @@ public class PaymentListener {
     private PaymentResult processPayment(Long orderId,
                                          String username,
                                          List<Map<String, Object>> items,
+                                         Map<String, Object> paymentCard,
                                          double totalPrice) {
         if (iyzicoPaymentClient.isConfigured()) {
             try {
                 log.info("IYZICO_PAYMENT_STARTED orderId={} username={}", orderId, username);
                 IyzicoPaymentClient.IyzicoPaymentResult result =
-                        iyzicoPaymentClient.pay(orderId, username, items);
+                        iyzicoPaymentClient.pay(orderId, username, items, paymentCard);
                 log.info("IYZICO_PAYMENT_RESULT orderId={} username={} success={} reason={}",
                         orderId, username, result.success(), result.reason());
                 return new PaymentResult(result.success(), result.reason());

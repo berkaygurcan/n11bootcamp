@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentListenerTest {
@@ -32,6 +33,7 @@ class PaymentListenerTest {
     @Test
     void stockReservedShouldPublishPaymentSuccessEvent() {
         PaymentListener listener = new PaymentListener(rabbitTemplate, iyzicoPaymentClient);
+        when(iyzicoPaymentClient.isConfigured()).thenReturn(false);
 
         listener.handle(payload(), "stock.reserved");
 
@@ -56,6 +58,7 @@ class PaymentListenerTest {
     @Test
     void stockReservedShouldPublishPaymentFailedEventWhenBasketTotalIsOverLimit() {
         PaymentListener listener = new PaymentListener(rabbitTemplate, iyzicoPaymentClient);
+        when(iyzicoPaymentClient.isConfigured()).thenReturn(false);
 
         listener.handle(payload(3), "stock.reserved");
 
@@ -76,6 +79,13 @@ class PaymentListenerTest {
         return Map.of(
                 "orderId", 55L,
                 "username", "demo",
+                "paymentCard", Map.of(
+                        "cardHolderName", "John Doe",
+                        "cardNumber", "5528790000000008",
+                        "expireMonth", "12",
+                        "expireYear", "2030",
+                        "cvc", "123"
+                ),
                 "items", List.of(Map.of(
                         "productId", 1L,
                         "productName", "iPhone 15",

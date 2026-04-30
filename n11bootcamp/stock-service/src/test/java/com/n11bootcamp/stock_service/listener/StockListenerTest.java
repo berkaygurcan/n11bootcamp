@@ -42,6 +42,7 @@ class StockListenerTest {
         assertThat(event.getOrderId()).isEqualTo(55L);
         assertThat(event.getUsername()).isEqualTo("demo");
         assertThat(event.getItems()).hasSize(1);
+        assertThat(event.getPaymentCard().get("cardNumber")).isEqualTo("5528790000000008");
     }
 
     @Test
@@ -82,6 +83,13 @@ class StockListenerTest {
         return Map.of(
                 "orderId", 55L,
                 "username", "demo",
+                "paymentCard", Map.of(
+                        "cardHolderName", "John Doe",
+                        "cardNumber", "5528790000000008",
+                        "expireMonth", "12",
+                        "expireYear", "2030",
+                        "cvc", "123"
+                ),
                 "items", List.of(Map.of(
                         "productId", 1L,
                         "productName", "iPhone 15",

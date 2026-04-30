@@ -8,6 +8,7 @@ public class OrderCreatedEvent implements Serializable {
     private String username;
     private Double totalPrice;
     private List<OrderItem> items;
+    private PaymentCard paymentCard;
 
     public static class OrderItem implements Serializable {
         private Long productId;
@@ -35,4 +36,25 @@ public class OrderCreatedEvent implements Serializable {
     public void setTotalPrice(Double totalPrice) { this.totalPrice = totalPrice; }
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
+    public PaymentCard getPaymentCard() { return paymentCard; }
+    public void setPaymentCard(PaymentCard paymentCard) { this.paymentCard = paymentCard; }
+
+    public static class PaymentCard implements Serializable {
+        private String cardHolderName;
+        private String cardNumber;
+        private String expireMonth;
+        private String expireYear;
+        private String cvc;
+
+        public String getCardHolderName() { return cardHolderName; }
+        public void setCardHolderName(String cardHolderName) { this.cardHolderName = cardHolderName; }
+        public String getCardNumber() { return cardNumber; }
+        public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
+        public String getExpireMonth() { return expireMonth; }
+        public void setExpireMonth(String expireMonth) { this.expireMonth = expireMonth; }
+        public String getExpireYear() { return expireYear; }
+        public void setExpireYear(String expireYear) { this.expireYear = expireYear; }
+        public String getCvc() { return cvc; }
+        public void setCvc(String cvc) { this.cvc = cvc; }
+    }
 }

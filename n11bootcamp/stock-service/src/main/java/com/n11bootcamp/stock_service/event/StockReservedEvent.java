@@ -7,6 +7,7 @@ public class StockReservedEvent {
     private Long orderId;
     private String username;
     private List<Map<String, Object>> items;
+    private Map<String, Object> paymentCard;
 
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
@@ -16,4 +17,7 @@ public class StockReservedEvent {
 
     public List<Map<String, Object>> getItems() { return items; }
     public void setItems(List<Map<String, Object>> items) { this.items = items; }
+
+    public Map<String, Object> getPaymentCard() { return paymentCard; }
+    public void setPaymentCard(Map<String, Object> paymentCard) { this.paymentCard = paymentCard; }
 }
