@@ -1,6 +1,7 @@
 package com.n11bootcamp.payment_service.controller;
 
 import com.n11bootcamp.payment_service.dto.PaymentRequest;
+import com.n11bootcamp.payment_service.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,9 @@ public class PaymentController {
 
     @PostMapping
     public Boolean pay(@RequestBody PaymentRequest request) {
+        if (request == null || request.getOrderId() == null) {
+            throw new BadRequestException("Order id is required");
+        }
 
         boolean success = Math.random() < 0.7;
 

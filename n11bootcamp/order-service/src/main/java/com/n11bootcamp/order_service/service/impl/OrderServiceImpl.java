@@ -7,6 +7,7 @@ import com.n11bootcamp.order_service.entity.Order;
 import com.n11bootcamp.order_service.entity.OrderItem;
 import com.n11bootcamp.order_service.entity.OrderStatus;
 import com.n11bootcamp.order_service.event.OrderCreatedEvent;
+import com.n11bootcamp.order_service.exception.BadRequestException;
 import com.n11bootcamp.order_service.repository.OrderRepository;
 import com.n11bootcamp.order_service.service.OrderService;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse createOrder(CreateOrderRequest request) {
+        validateCreateOrderRequest(request);
 
         // 1️⃣ Order oluştur
         Order order = new Order();
@@ -123,6 +125,20 @@ public class OrderServiceImpl implements OrderService {
         paymentCard.setExpireYear(dto.getExpireYear());
         paymentCard.setCvc(dto.getCvc());
         return paymentCard;
+    }
+
+    private void validateCreateOrderRequest(CreateOrderRequest request) {
+        if (request == null) {
+            throw new BadRequestException("Order request is required");
+        }
+
+        if (request.getUsername() == null || request.getUsername().isBlank()) {
+            throw new BadRequestException("Username is required");
+        }
+
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new BadRequestException("Order items are required");
+        }
     }
 
     @Override

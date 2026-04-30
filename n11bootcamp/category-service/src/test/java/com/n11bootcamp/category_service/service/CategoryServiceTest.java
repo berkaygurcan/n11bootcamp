@@ -1,6 +1,7 @@
 package com.n11bootcamp.category_service.service;
 
 import com.n11bootcamp.category_service.entity.Category;
+import com.n11bootcamp.category_service.exception.ResourceNotFoundException;
 import com.n11bootcamp.category_service.repository.CategoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,7 +68,7 @@ class CategoryServiceTest {
         when(repository.findByKey("missing")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getByKey("missing"))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Category not found");
     }
 

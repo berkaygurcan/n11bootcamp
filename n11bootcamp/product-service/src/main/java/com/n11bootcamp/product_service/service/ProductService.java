@@ -2,6 +2,8 @@ package com.n11bootcamp.product_service.service;
 
 import com.n11bootcamp.product_service.dto.CategoryResponse;
 import com.n11bootcamp.product_service.entity.Product;
+import com.n11bootcamp.product_service.exception.BadRequestException;
+import com.n11bootcamp.product_service.exception.ResourceNotFoundException;
 import com.n11bootcamp.product_service.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +42,7 @@ public class ProductService {
 
     public CategoryResponse validateCategory(String categoryKey) {
         if (categoryKey == null || categoryKey.isBlank()) {
-            throw new RuntimeException("Category key is required!");
+            throw new BadRequestException("Category key is required!");
         }
 
         String url = "http://localhost:8763/api/categories/" + categoryKey;
@@ -48,11 +50,13 @@ public class ProductService {
         try {
             CategoryResponse category = restTemplate.getForObject(url, CategoryResponse.class);
             if (category == null) {
-                throw new RuntimeException("Category not found!");
+                throw new ResourceNotFoundException("Category not found!");
             }
             return category;
         } catch (HttpClientErrorException.NotFound e) {
-            throw new RuntimeException("Category not found!");
+            throw new ResourceNotFoundException("Category not found!");
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Category service error!");
         }
@@ -60,7 +64,7 @@ public class ProductService {
 
     public ResponseEntity<Product> getProductById(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found in DB"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found in DB"));
         return ResponseEntity.ok(product);
     }
 
@@ -80,7 +84,7 @@ public class ProductService {
 
     public ResponseEntity<Product> updateProduct(Long productId, Product updatedProduct) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found in DB"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found in DB"));
 
         product.setImg(updatedProduct.getImg());
         product.setPrice(updatedProduct.getPrice());
@@ -100,7 +104,7 @@ public class ProductService {
             productRepository.deleteById(id);
             return ResponseEntity.ok("Product deleted successfully");
         } else {
-            throw new RuntimeException("Product not found in DB");
+            throw new ResourceNotFoundException("Product not found in DB");
         }
     }
 

@@ -1,6 +1,7 @@
 package com.n11bootcamp.category_service.service;
 
 import com.n11bootcamp.category_service.entity.Category;
+import com.n11bootcamp.category_service.exception.ResourceNotFoundException;
 import com.n11bootcamp.category_service.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,6 @@ public class CategoryService {
 
     public Category getByKey(String key) {
         return repository.findByKey(key)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
     }
 }

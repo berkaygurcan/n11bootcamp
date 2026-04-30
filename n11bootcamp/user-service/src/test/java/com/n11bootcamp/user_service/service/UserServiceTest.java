@@ -1,6 +1,8 @@
 package com.n11bootcamp.user_service.service;
 
 import com.n11bootcamp.user_service.entity.User;
+import com.n11bootcamp.user_service.exception.BadRequestException;
+import com.n11bootcamp.user_service.exception.ResourceNotFoundException;
 import com.n11bootcamp.user_service.repository.UserRepository;
 import com.n11bootcamp.user_service.request.SignupRequest;
 import com.n11bootcamp.user_service.request.UpdateUserRequest;
@@ -17,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -60,10 +63,9 @@ class UserServiceTest {
 
         when(userRepository.existsByUsername("demo")).thenReturn(true);
 
-        ResponseEntity<?> response = service.registerUser(request);
-
-        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
-        assertThat(message(response)).isEqualTo("Username is already taken!");
+        assertThatThrownBy(() -> service.registerUser(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Username is already taken!");
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -74,10 +76,9 @@ class UserServiceTest {
         when(userRepository.existsByUsername("demo")).thenReturn(false);
         when(userRepository.existsByEmail("demo@test.com")).thenReturn(true);
 
-        ResponseEntity<?> response = service.registerUser(request);
-
-        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
-        assertThat(message(response)).isEqualTo("Email is already in use!");
+        assertThatThrownBy(() -> service.registerUser(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Email is already in use!");
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -109,10 +110,9 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userRepository.existsByEmail("new@test.com")).thenReturn(true);
 
-        ResponseEntity<?> response = service.updateUser(1L, request);
-
-        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
-        assertThat(message(response)).isEqualTo("Email is already in use!");
+        assertThatThrownBy(() -> service.updateUser(1L, request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Email is already in use!");
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -122,10 +122,9 @@ class UserServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ResponseEntity<?> response = service.updateUser(1L, request);
-
-        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
-        assertThat(message(response)).isEqualTo("User not found!");
+        assertThatThrownBy(() -> service.updateUser(1L, request))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("User not found!");
     }
 
     private SignupRequest signupRequest() {

@@ -5,6 +5,7 @@ import java.util.*;
 import com.n11bootcamp.shopping_cart_service.entity.CartItem;
 import com.n11bootcamp.shopping_cart_service.entity.Product;
 import com.n11bootcamp.shopping_cart_service.entity.ShoppingCart;
+import com.n11bootcamp.shopping_cart_service.exception.ResourceNotFoundException;
 import com.n11bootcamp.shopping_cart_service.repository.ProductRepository;
 import com.n11bootcamp.shopping_cart_service.repository.ShoppingCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class ShoppingCartService {
     public ResponseEntity<ShoppingCart> addProducts(Long shoppingCartId, List<Product> products) {
 
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
-                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping cart not found"));
 
         // ✅ Ürünleri güvenli şekilde upsert et (NULL overwrite yok)
         List<Product> persistedProducts = new ArrayList<>();
@@ -86,7 +87,7 @@ public class ShoppingCartService {
 
     public ResponseEntity<ShoppingCart> addItem(Long shoppingCartId, Map<String, Object> itemRequest) {
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
-                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping cart not found"));
 
         Long productId = Long.valueOf(itemRequest.get("productId").toString());
         String productName = itemRequest.get("productName").toString();
@@ -125,7 +126,7 @@ public class ShoppingCartService {
                                                            Long productId,
                                                            Map<String, Object> itemRequest) {
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
-                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping cart not found"));
 
         Integer quantity = Integer.valueOf(itemRequest.get("quantity").toString());
 
@@ -143,7 +144,7 @@ public class ShoppingCartService {
 
     public ResponseEntity<ShoppingCart> removeItem(Long shoppingCartId, Long productId) {
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
-                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping cart not found"));
 
         if (shoppingCart.getItems() != null) {
             shoppingCart.getItems().removeIf(item -> item.getProductId().equals(productId));
@@ -154,7 +155,7 @@ public class ShoppingCartService {
 
     public ResponseEntity<ShoppingCart> removeProduct(Long shoppingCartId, Long productId) {
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
-                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping cart not found"));
 
         Set<Product> existingProducts = shoppingCart.getProducts();
         if (existingProducts == null) return ResponseEntity.ok().body(shoppingCart);
@@ -174,7 +175,7 @@ public class ShoppingCartService {
         Map<String, String> response = new HashMap<>();
 
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
-                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping cart not found"));
 
         if (shoppingCart.getItems() != null && !shoppingCart.getItems().isEmpty()) {
             double totalPrice = shoppingCart.getItems()
@@ -199,7 +200,7 @@ public class ShoppingCartService {
 
     public ResponseEntity<ShoppingCart> getCartById(Long shoppingCartId) {
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
-                .orElseThrow(() -> new RuntimeException("Shopping cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping cart not found"));
 
         return ResponseEntity.ok(shoppingCart);
     }
@@ -210,7 +211,7 @@ public class ShoppingCartService {
         if (opt.isPresent()) {
             return ResponseEntity.ok(opt.get());
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw new ResourceNotFoundException("Shopping cart not found");
         }
     }
 
@@ -224,7 +225,7 @@ public class ShoppingCartService {
             shoppingCartRepository.deleteById(shoppingCartId);
             return ResponseEntity.ok("Shopping Cart deleted successfully");
         } else {
-            throw new RuntimeException("Shopping Cart not found in DB");
+            throw new ResourceNotFoundException("Shopping Cart not found in DB");
         }
     }
 
