@@ -2,6 +2,8 @@ package com.n11bootcamp.order_service.listener;
 
 import com.n11bootcamp.order_service.entity.OrderStatus;
 import com.n11bootcamp.order_service.repository.OrderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.handler.annotation.Header;
@@ -11,6 +13,8 @@ import java.util.Map;
 
 @Component
 public class StockResultListener {
+
+    private static final Logger log = LoggerFactory.getLogger(StockResultListener.class);
 
     private final RabbitTemplate rabbitTemplate;
     private final OrderRepository orderRepository;
@@ -25,14 +29,13 @@ public class StockResultListener {
     public void handle(Map<String, Object> payload,
                        @Header("amqp_receivedRoutingKey") String key) {
 
-        System.out.println("ORDER SERVICE EVENT → " + key);
-
         Long orderId = Long.valueOf(payload.get("orderId").toString());
+        log.info("ORDER_EVENT_RECEIVED orderId={} event={}", orderId, key);
 
         // ✅ SADECE burada payment tetikle
         if ("stock.reserved".equals(key)) {
 
-            System.out.println("STOCK OK → PAYMENT START → " + orderId);
+            log.info("PAYMENT_PROCESS_REQUESTED orderId={}", orderId);
 
             rabbitTemplate.convertAndSend(
                     "order.exchange",
@@ -49,7 +52,7 @@ public class StockResultListener {
                 orderRepository.save(order);
             });
 
-            System.out.println("STOCK FAILED → ORDER CANCELLED → " + orderId);
+            log.warn("ORDER_CANCELLED orderId={} reason=STOCK_FAILED", orderId);
         }
 
         else if ("payment.success".equals(key)) {
@@ -60,7 +63,7 @@ public class StockResultListener {
                 orderRepository.save(order);
             });
 
-            System.out.println("PAYMENT SUCCESS → ORDER COMPLETED → " + orderId);
+            log.info("ORDER_COMPLETED orderId={}", orderId);
         }
 
         else if ("payment.failed".equals(key)) {
@@ -71,7 +74,7 @@ public class StockResultListener {
                 orderRepository.save(order);
             });
 
-            System.out.println("PAYMENT FAILED → ORDER CANCELLED → " + orderId);
+            log.warn("ORDER_CANCELLED orderId={} reason=PAYMENT_FAILED", orderId);
         }
     }
 }

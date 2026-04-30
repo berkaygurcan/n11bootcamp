@@ -9,6 +9,8 @@ import com.n11bootcamp.order_service.entity.OrderStatus;
 import com.n11bootcamp.order_service.event.OrderCreatedEvent;
 import com.n11bootcamp.order_service.repository.OrderRepository;
 import com.n11bootcamp.order_service.service.OrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private final OrderRepository orderRepository;
     private final RabbitTemplate rabbitTemplate;
@@ -83,7 +87,8 @@ public class OrderServiceImpl implements OrderService {
                 event
         );
 
-        System.out.println("ORDER CREATED EVENT GÖNDERİLDİ → " + saved.getId());
+        log.info("ORDER_CREATED_EVENT_SENT orderId={} username={} totalPrice={}",
+                saved.getId(), saved.getUsername(), saved.getTotalPrice());
 
         // 5️⃣ response
         OrderResponse response = new OrderResponse();

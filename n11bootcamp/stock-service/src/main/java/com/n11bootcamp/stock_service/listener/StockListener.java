@@ -52,7 +52,7 @@ public class StockListener {
         String username = payload.get("username").toString();
         List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
 
-        log.info("STOCK CHECK → {}", orderId);
+        log.info("STOCK_CHECK_STARTED orderId={} username={} itemCount={}", orderId, username, items.size());
 
         try {
             for (Map<String, Object> item : items) {
@@ -72,7 +72,7 @@ public class StockListener {
                     e
             );
 
-            log.info("STOCK RESERVED → {}", orderId);
+            log.info("STOCK_RESERVED orderId={} username={}", orderId, username);
 
         } catch (RuntimeException exception) {
 
@@ -87,7 +87,7 @@ public class StockListener {
                     e
             );
 
-            log.warn("STOCK FAILED → {}", orderId);
+            log.warn("STOCK_FAILED orderId={} username={} reason={}", orderId, username, exception.getMessage());
         }
     }
 
@@ -95,7 +95,7 @@ public class StockListener {
         List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
 
         if (items == null) {
-            log.warn("STOCK RELEASE SKIPPED → items empty for order {}", orderId);
+            log.warn("STOCK_RELEASE_SKIPPED orderId={} reason=ITEMS_EMPTY", orderId);
             return;
         }
 
@@ -105,14 +105,14 @@ public class StockListener {
             stockService.releaseStock(productId, quantity);
         }
 
-        log.info("STOCK RELEASED → {}", orderId);
+        log.info("STOCK_RELEASED orderId={}", orderId);
     }
 
     private void commitReservedStock(Map<String, Object> payload, Long orderId) {
         List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
 
         if (items == null) {
-            log.warn("STOCK COMMIT SKIPPED → items empty for order {}", orderId);
+            log.warn("STOCK_COMMIT_SKIPPED orderId={} reason=ITEMS_EMPTY", orderId);
             return;
         }
 
@@ -122,6 +122,6 @@ public class StockListener {
             stockService.commitStock(productId, quantity);
         }
 
-        log.info("STOCK COMMITTED → {}", orderId);
+        log.info("STOCK_COMMITTED orderId={}", orderId);
     }
 }

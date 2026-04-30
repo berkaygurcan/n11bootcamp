@@ -1,5 +1,6 @@
 package com.n11bootcamp.payment_service.listener;
 
+import com.n11bootcamp.payment_service.event.PaymentFailedEvent;
 import com.n11bootcamp.payment_service.event.PaymentSuccessEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +49,26 @@ class PaymentListenerTest {
         verify(rabbitTemplate, never()).convertAndSend(anyString(), anyString(), any(Object.class));
     }
 
+    @Test
+    void stockReservedShouldPublishPaymentFailedEventWhenBasketTotalIsOverLimit() {
+        PaymentListener listener = new PaymentListener(rabbitTemplate);
+
+        listener.handle(payload(3), "stock.reserved");
+
+        ArgumentCaptor<PaymentFailedEvent> captor = ArgumentCaptor.forClass(PaymentFailedEvent.class);
+        verify(rabbitTemplate).convertAndSend(eq("order.exchange"), eq("payment.failed"), captor.capture());
+
+        PaymentFailedEvent event = captor.getValue();
+        assertThat(event.getOrderId()).isEqualTo(55L);
+        assertThat(event.getUsername()).isEqualTo("demo");
+        assertThat(event.getReason()).isEqualTo("Basket total is over 100000 TL");
+    }
+
     private Map<String, Object> payload() {
+        return payload(2);
+    }
+
+    private Map<String, Object> payload(int quantity) {
         return Map.of(
                 "orderId", 55L,
                 "username", "demo",
@@ -56,7 +76,7 @@ class PaymentListenerTest {
                         "productId", 1L,
                         "productName", "iPhone 15",
                         "price", 50000,
-                        "quantity", 2
+                        "quantity", quantity
                 ))
         );
     }
