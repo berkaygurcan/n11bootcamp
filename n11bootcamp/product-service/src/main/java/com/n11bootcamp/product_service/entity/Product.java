@@ -37,36 +37,17 @@ public class Product {
     @Column(name = "color", length = 100)
     private String color;
 
-    /**
-     * ✅ DB FIX (legacy):
-     * product.title NOT NULL ise burada tutulmalı
-     */
     @Column(name = "title", nullable = false, length = 255)
     private String title = "-";
 
-    /**
-     * ✅ DB FIX (legacy):
-     * product.category NOT NULL ise burada tutulmalı
-     */
     @Column(name = "category", nullable = false, length = 255)
     private String category = "giysi";
 
-    /**
-     * ✅ NEW (legacy):
-     * Eğer DB’de product.description kolonu varsa buraya eklenebilir.
-     * i18n sisteminde asıl açıklama translation tablosunda tutulmalı.
-     */
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    // Dil bağımsız key
     @Column(name = "category_key", length = 100)
     private String categoryKey;
-
-
-    // ======================
-    // getters/setters
-    // ======================
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -92,7 +73,6 @@ public class Product {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
-    // ✅ NEW description getter/setter
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 

@@ -25,9 +25,8 @@ public class ShoppingCartService {
     @Autowired
     private RestTemplate restTemplate;
 
-    // ✅ Microservice discovery kullanıyorsan:
     private static final String PRODUCT_SERVICE_BASE = "http://PRODUCT-SERVICE";
-    // ✅ Local test için istersen bunu açıp kapatabilirsin:
+    // Lokal testte servis keşfi yerine doğrudan port kullanılabilir.
     // private static final String PRODUCT_SERVICE_BASE = "http://localhost:8764";
 
     public ResponseEntity<ShoppingCart> createCart(String name) {
@@ -41,7 +40,6 @@ public class ShoppingCartService {
         ShoppingCart shoppingCart = shoppingCartRepository.findById(shoppingCartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Shopping cart not found"));
 
-        // ✅ Ürünleri güvenli şekilde upsert et (NULL overwrite yok)
         List<Product> persistedProducts = new ArrayList<>();
 
         for (Product incoming : products) {
@@ -166,7 +164,6 @@ public class ShoppingCartService {
         return ResponseEntity.ok().body(shoppingCartRepository.save(shoppingCart));
     }
 
-    // ✅ Controller compile fix için tek parametreli overload kalsın
     public ResponseEntity<Map<String, String>> getShoppingCartPrice(Long shoppingCartId) {
         return getShoppingCartPriceInternal(shoppingCartId);
     }

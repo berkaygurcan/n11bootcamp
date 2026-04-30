@@ -19,7 +19,6 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    // Getter Setter
     public Long getId() { return id; }
 
     public Long getProductId() { return productId; }

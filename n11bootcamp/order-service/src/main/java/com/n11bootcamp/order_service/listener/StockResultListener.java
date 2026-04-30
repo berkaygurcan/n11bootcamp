@@ -32,7 +32,6 @@ public class StockResultListener {
         Long orderId = Long.valueOf(payload.get("orderId").toString());
         log.info("ORDER_EVENT_RECEIVED orderId={} event={}", orderId, key);
 
-        // ✅ SADECE burada payment tetikle
         if ("stock.reserved".equals(key)) {
 
             log.info("PAYMENT_PROCESS_REQUESTED orderId={}", orderId);

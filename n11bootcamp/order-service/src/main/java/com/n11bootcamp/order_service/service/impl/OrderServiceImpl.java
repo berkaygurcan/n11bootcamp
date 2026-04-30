@@ -36,12 +36,10 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(CreateOrderRequest request) {
         validateCreateOrderRequest(request);
 
-        // 1️⃣ Order oluştur
         Order order = new Order();
         order.setUsername(request.getUsername());
         order.setStatus(OrderStatus.CREATED);
 
-        // 2️⃣ OrderItem mapping
         List<OrderItem> items = request.getItems().stream().map(dto -> {
             OrderItem item = new OrderItem();
             item.setProductId(dto.getProductId());
@@ -54,14 +52,12 @@ public class OrderServiceImpl implements OrderService {
 
         order.setItems(items);
 
-        // 3️⃣ total price hesapla
         double total = items.stream()
                 .mapToDouble(i -> i.getPrice() * i.getQuantity())
                 .sum();
 
         order.setTotalPrice(total);
 
-        // 4️⃣ save
         Order saved = orderRepository.save(order);
 
         OrderCreatedEvent event = new OrderCreatedEvent();
@@ -71,7 +67,6 @@ public class OrderServiceImpl implements OrderService {
         event.setTotalPrice(saved.getTotalPrice());
         event.setPaymentCard(toPaymentCardEvent(request.getPaymentCard()));
 
-// items map
         List<OrderCreatedEvent.OrderItem> itemsEvent = saved.getItems().stream().map(i -> {
             OrderCreatedEvent.OrderItem item = new OrderCreatedEvent.OrderItem();
             item.setProductId(i.getProductId());
@@ -83,7 +78,6 @@ public class OrderServiceImpl implements OrderService {
 
         event.setItems(itemsEvent);
 
-// 🔥 EVENT GÖNDER
         rabbitTemplate.convertAndSend(
                 "order.exchange",
                 "order.created",
@@ -93,7 +87,6 @@ public class OrderServiceImpl implements OrderService {
         log.info("ORDER_CREATED_EVENT_SENT orderId={} username={} totalPrice={}",
                 saved.getId(), saved.getUsername(), saved.getTotalPrice());
 
-        // 5️⃣ response
         OrderResponse response = new OrderResponse();
         response.setOrderId(saved.getId());
         response.setUsername(saved.getUsername());

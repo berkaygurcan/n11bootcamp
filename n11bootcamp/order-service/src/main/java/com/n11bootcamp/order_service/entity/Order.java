@@ -23,7 +23,6 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
-    // Getter Setter
     public Long getId() { return id; }
 
     public String getUsername() { return username; }

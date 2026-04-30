@@ -13,7 +13,6 @@ public class StockUpdateResponse {
         private Integer oldQuantity;
         private Integer newQuantity;
 
-        // Getter / Setter
         public Long getProductId() { return productId; }
         public void setProductId(Long productId) { this.productId = productId; }
 
@@ -24,7 +23,6 @@ public class StockUpdateResponse {
         public void setNewQuantity(Integer newQuantity) { this.newQuantity = newQuantity; }
     }
 
-    // Getter / Setter
     public boolean isSuccess() { return success; }
     public void setSuccess(boolean success) { this.success = success; }
 

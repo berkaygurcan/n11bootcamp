@@ -59,7 +59,6 @@ public class ShoppingCartController {
         return shoppingCartService.removeProduct(shoppingCartId, productId);
     }
 
-    // ✅ (compile fix) signature yine Long tek parametre
     @GetMapping("/totalprice/{id}")
     public ResponseEntity<Map<String, String>> getTotalPrice(
             @PathVariable("id") Long shoppingCartId) {

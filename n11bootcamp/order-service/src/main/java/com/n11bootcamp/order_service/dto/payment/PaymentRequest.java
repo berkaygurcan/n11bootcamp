@@ -9,13 +9,12 @@ public class PaymentRequest {
     private Double amount;
     private String paymentMethod;
 
-    // NEW: buyer details
     private String firstName;
     private String lastName;
     private String email;
     private String phone;
     private String city;
-    private String streetAddress; // frontend gönderiyor, backend zaten CreateOrderRequest kullanıyor
+    private String streetAddress;
     private String country;
 
     public String getAddress() {
@@ -31,9 +30,8 @@ public class PaymentRequest {
 
     private Card card;
 
-    private List<Item> items; // <-- order'daki ürünler
+    private List<Item> items;
 
-    // getters / setters
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
 
@@ -73,14 +71,12 @@ public class PaymentRequest {
     public List<Item> getItems() { return items; }
     public void setItems(List<Item> items) { this.items = items; }
 
-    // inner classes
     public static class Card {
         private String cardHolderName;
         private String cardNumber;
         private String expireMonth;
         private String expireYear;
         private String cvc;
-        // getters / setters...
         public String getCardHolderName() { return cardHolderName; }
         public void setCardHolderName(String cardHolderName) { this.cardHolderName = cardHolderName; }
         public String getCardNumber() { return cardNumber; }
@@ -100,7 +96,6 @@ public class PaymentRequest {
         private Integer quantity;
         private String category1;
         private String category2;
-        // getters / setters...
         public Long getProductId() { return productId; }
         public void setProductId(Long productId) { this.productId = productId; }
         public String getProductName() { return productName; }

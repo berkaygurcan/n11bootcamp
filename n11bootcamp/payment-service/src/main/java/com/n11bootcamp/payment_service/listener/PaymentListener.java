@@ -31,7 +31,6 @@ public class PaymentListener {
     public void handle(Map<String, Object> payload,
                        @Header("amqp_receivedRoutingKey") String key) {
 
-        // ❗ sadece stock.reserved dinle
         if (!"stock.reserved".equals(key)) {
             return;
         }
@@ -61,7 +60,7 @@ public class PaymentListener {
             rabbitTemplate.convertAndSend(
                     "order.exchange",
                     "payment.success",
-                    e   // 🔥 EVENT EKLEDİK
+                    e
             );
 
             log.info("PAYMENT_SUCCESS orderId={} username={}", orderId, username);

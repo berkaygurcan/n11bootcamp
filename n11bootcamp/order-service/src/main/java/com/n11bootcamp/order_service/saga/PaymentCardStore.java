@@ -13,13 +13,11 @@ import java.util.concurrent.ConcurrentMap;
 @Component
 public class PaymentCardStore {
 
-    // key: orderId, value: PaymentRequest.Card
     private final ConcurrentMap<Long, PaymentRequest.Card> store = new ConcurrentHashMap<>();
 
     public void put(Long orderId, PaymentRequest.Card card) {
         if (orderId == null || card == null) return;
 
-        // Güvenlik için shallow copy
         PaymentRequest.Card copy = new PaymentRequest.Card();
         copy.setCardHolderName(card.getCardHolderName());
         copy.setCardNumber(card.getCardNumber());

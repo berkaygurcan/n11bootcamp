@@ -5,7 +5,7 @@ import com.n11bootcamp.order_service.dto.payment.PaymentResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
-@FeignClient(name = "payment-service") // Eureka üzerinden discovery
+@FeignClient(name = "payment-service")
 public interface PaymentServiceClient {
 
     @PostMapping("/api/payments/pay")

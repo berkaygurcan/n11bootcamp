@@ -11,7 +11,6 @@ public class StockUpdateRequest {
         private Long productId;
         private Integer quantity;
 
-        // Getter / Setter
         public Long getProductId() { return productId; }
         public void setProductId(Long productId) { this.productId = productId; }
 
@@ -19,7 +18,6 @@ public class StockUpdateRequest {
         public void setQuantity(Integer quantity) { this.quantity = quantity; }
     }
 
-    // Getter / Setter
     public List<StockItem> getItems() { return items; }
     public void setItems(List<StockItem> items) { this.items = items; }
 }

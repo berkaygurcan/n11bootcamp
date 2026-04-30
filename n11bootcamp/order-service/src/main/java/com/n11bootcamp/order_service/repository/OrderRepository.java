@@ -8,7 +8,6 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    // Admin için tüm siparişleri getirmek yeterli
 
     List<Order> findByUsername(String username);
 }

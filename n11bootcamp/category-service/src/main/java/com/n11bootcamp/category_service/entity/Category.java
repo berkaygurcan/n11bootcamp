@@ -18,10 +18,6 @@ public class Category {
 
     private String description;
 
-    // ======================
-    // getters & setters
-    // ======================
-
     public Long getId() {
         return id;
     }

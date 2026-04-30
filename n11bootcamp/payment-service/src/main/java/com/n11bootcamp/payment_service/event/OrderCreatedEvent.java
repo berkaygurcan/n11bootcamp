@@ -15,7 +15,6 @@ public class OrderCreatedEvent implements Serializable {
         private Integer quantity;
         private Double price;
 
-        // getters / setters
         public Long getProductId() { return productId; }
         public void setProductId(Long productId) { this.productId = productId; }
         public String getProductName() { return productName; }
@@ -26,7 +25,6 @@ public class OrderCreatedEvent implements Serializable {
         public void setPrice(Double price) { this.price = price; }
     }
 
-    // getters / setters
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
     public String getUsername() { return username; }

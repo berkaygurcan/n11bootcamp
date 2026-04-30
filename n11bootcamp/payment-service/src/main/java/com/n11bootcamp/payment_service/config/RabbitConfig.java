@@ -29,13 +29,11 @@ public class RabbitConfig {
                 .with("stock.reserved");
     }
 
-    // 🔥 JSON converter
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
-    // 🔥 Producer için (event gönderirken)
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
@@ -43,7 +41,6 @@ public class RabbitConfig {
         return template;
     }
 
-    // 🔥 Listener için (çok kritik)
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory) {

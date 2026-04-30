@@ -8,8 +8,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @SpringBootApplication
-@EnableDiscoveryClient   // Eureka client olarak kaydolmak için
-@EnableRabbit            // RabbitMQ listener kullanmak için
+@EnableDiscoveryClient
+@EnableRabbit
 @CrossOrigin
 @EnableFeignClients
 public class OrderServiceApplication {

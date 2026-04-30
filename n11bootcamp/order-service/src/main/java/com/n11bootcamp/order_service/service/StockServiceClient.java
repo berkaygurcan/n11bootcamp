@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "stock-service", path = "/api/stocks")
 public interface StockServiceClient {
 
-    // 🟢 Stok düşürme (sipariş sırasında)
     @PostMapping("/decrease")
     StockUpdateResponse decreaseStock(@RequestBody StockUpdateRequest request);
 
-    // 🔵 Stok iadesi (ödeme başarısız vs.)
     @PostMapping("/increase")
     StockUpdateResponse increaseStock(@RequestBody StockUpdateRequest request);
 }

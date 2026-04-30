@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface OrderService {
     OrderResponse createOrder(CreateOrderRequest request);
-    List<OrderResponse> getAllOrders();  // 🔥 bunu ekle
+    List<OrderResponse> getAllOrders();
 }
 

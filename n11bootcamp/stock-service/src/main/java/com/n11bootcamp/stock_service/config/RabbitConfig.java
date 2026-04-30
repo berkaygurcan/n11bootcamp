@@ -18,19 +18,16 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 @Configuration
 public class RabbitConfig {
 
-    // 🔥 Ortak exchange (order ve payment ile aynı olmalı)
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange("order.exchange");
     }
 
-    // 🔥 Stock queue
     @Bean
     public Queue stockQueue() {
         return new Queue("stock.queue");
     }
 
-    // 🔥 order.created eventini stock.queue'ya bağla
     @Bean
     public Binding binding(Queue stockQueue, TopicExchange exchange) {
         return BindingBuilder.bind(stockQueue)
@@ -52,13 +49,11 @@ public class RabbitConfig {
                 .with("payment.success");
     }
 
-    // 🔥 JSON converter
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
-    // 🔥 Event gönderirken JSON kullan
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
@@ -66,7 +61,6 @@ public class RabbitConfig {
         return template;
     }
 
-    // 🔥 Listener için converter bağla (çok önemli)
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory) {

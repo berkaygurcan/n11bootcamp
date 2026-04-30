@@ -11,8 +11,6 @@ public class UpdateUserRequest {
     @Email(message = "Invalid email")
     private String email;
 
-    // Getters and setters
-
     public String getPassword() {
         return password;
     }

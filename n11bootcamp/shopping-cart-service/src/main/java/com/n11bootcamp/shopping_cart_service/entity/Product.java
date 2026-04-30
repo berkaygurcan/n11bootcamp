@@ -19,7 +19,6 @@ public class Product {
     private long price;
     private String description;
 
-    // DB NOT NULL
     private String category;
 
     @Column(name = "category_key")
@@ -27,9 +26,6 @@ public class Product {
 
     @ManyToMany(mappedBy = "products")
     private Set<ShoppingCart> shoppingCarts;
-
-
-    // --- getters/setters ---
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }

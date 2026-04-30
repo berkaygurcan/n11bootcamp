@@ -31,14 +31,11 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final RestTemplate restTemplate;
 
-    // 🔥 constructor injection
     public ProductService(ProductRepository productRepository,
                           RestTemplate restTemplate) {
         this.productRepository = productRepository;
         this.restTemplate = restTemplate;
     }
-
-    // ------------------ CATEGORY VALIDATION ------------------
 
     public CategoryResponse validateCategory(String categoryKey) {
         if (categoryKey == null || categoryKey.isBlank()) {
@@ -73,7 +70,6 @@ public class ProductService {
         return ResponseEntity.ok(productList);
     }
 
-    // 🔥 CREATE (VALIDATION EKLENDİ)
     public ResponseEntity<Product> createProduct(Product product) {
 
         CategoryResponse category = validateCategory(product.getCategoryKey());
