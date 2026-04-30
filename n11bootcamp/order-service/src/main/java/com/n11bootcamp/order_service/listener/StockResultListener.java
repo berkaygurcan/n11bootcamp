@@ -5,7 +5,6 @@ import com.n11bootcamp.order_service.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
@@ -16,12 +15,9 @@ public class StockResultListener {
 
     private static final Logger log = LoggerFactory.getLogger(StockResultListener.class);
 
-    private final RabbitTemplate rabbitTemplate;
     private final OrderRepository orderRepository;
 
-    public StockResultListener(RabbitTemplate rabbitTemplate,
-                               OrderRepository orderRepository) {
-        this.rabbitTemplate = rabbitTemplate;
+    public StockResultListener(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
     }
 
@@ -33,14 +29,7 @@ public class StockResultListener {
         log.info("ORDER_EVENT_RECEIVED orderId={} event={}", orderId, key);
 
         if ("stock.reserved".equals(key)) {
-
-            log.info("PAYMENT_PROCESS_REQUESTED orderId={}", orderId);
-
-            rabbitTemplate.convertAndSend(
-                    "order.exchange",
-                    "payment.process",
-                    payload
-            );
+            log.info("PAYMENT_PROCESS_WAITING orderId={}", orderId);
         }
 
         else if ("stock.failed".equals(key)) {

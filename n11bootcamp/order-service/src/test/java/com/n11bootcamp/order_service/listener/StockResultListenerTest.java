@@ -7,13 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,26 +22,23 @@ import static org.mockito.Mockito.when;
 class StockResultListenerTest {
 
     @Mock
-    private RabbitTemplate rabbitTemplate;
-
-    @Mock
     private OrderRepository orderRepository;
 
     @Test
-    void stockReservedShouldStartPaymentProcess() {
-        StockResultListener listener = new StockResultListener(rabbitTemplate, orderRepository);
+    void stockReservedShouldNotUpdateOrderStatus() {
+        StockResultListener listener = new StockResultListener(orderRepository);
         Map<String, Object> payload = Map.of("orderId", 55L);
 
         listener.handle(payload, "stock.reserved");
 
-        verify(rabbitTemplate).convertAndSend("order.exchange", "payment.process", payload);
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
     @Test
     void stockFailedShouldCancelOrder() {
         Order order = order(55L);
         when(orderRepository.findById(55L)).thenReturn(Optional.of(order));
-        StockResultListener listener = new StockResultListener(rabbitTemplate, orderRepository);
+        StockResultListener listener = new StockResultListener(orderRepository);
 
         listener.handle(Map.of("orderId", 55L), "stock.failed");
 
@@ -54,7 +52,7 @@ class StockResultListenerTest {
         Order order = order(55L);
         order.setFailureReason("PAYMENT_FAILED");
         when(orderRepository.findById(55L)).thenReturn(Optional.of(order));
-        StockResultListener listener = new StockResultListener(rabbitTemplate, orderRepository);
+        StockResultListener listener = new StockResultListener(orderRepository);
 
         listener.handle(Map.of("orderId", 55L), "payment.success");
 
@@ -67,7 +65,7 @@ class StockResultListenerTest {
     void paymentFailedShouldCancelOrder() {
         Order order = order(55L);
         when(orderRepository.findById(55L)).thenReturn(Optional.of(order));
-        StockResultListener listener = new StockResultListener(rabbitTemplate, orderRepository);
+        StockResultListener listener = new StockResultListener(orderRepository);
 
         listener.handle(Map.of("orderId", 55L), "payment.failed");
 
