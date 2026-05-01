@@ -31,6 +31,36 @@ CREATE TABLE IF NOT EXISTS product_stock (
   reserved_quantity INTEGER NOT NULL
 );
 
+CREATE SEQUENCE IF NOT EXISTS shopping_cart_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS cart_item_seq START WITH 1 INCREMENT BY 50;
+
+CREATE TABLE IF NOT EXISTS shopping_cart (
+  id BIGINT PRIMARY KEY,
+  shopping_cart_name VARCHAR(255),
+  CONSTRAINT uk_shopping_cart_name UNIQUE (shopping_cart_name)
+);
+
+CREATE TABLE IF NOT EXISTS cart_item (
+  id BIGINT PRIMARY KEY,
+  product_id BIGINT,
+  product_name VARCHAR(255),
+  price DOUBLE PRECISION,
+  quantity INTEGER,
+  shopping_cart_id BIGINT,
+  CONSTRAINT fk_cart_item_shopping_cart
+    FOREIGN KEY (shopping_cart_id) REFERENCES shopping_cart(id)
+);
+
+CREATE TABLE IF NOT EXISTS shopping_cart_product (
+  shopping_cart_id BIGINT NOT NULL,
+  product_id BIGINT NOT NULL,
+  PRIMARY KEY (shopping_cart_id, product_id),
+  CONSTRAINT fk_shopping_cart_product_cart
+    FOREIGN KEY (shopping_cart_id) REFERENCES shopping_cart(id),
+  CONSTRAINT fk_shopping_cart_product_product
+    FOREIGN KEY (product_id) REFERENCES product(id)
+);
+
 CREATE SEQUENCE IF NOT EXISTS userservice_users_seq START WITH 1 INCREMENT BY 50;
 
 CREATE TABLE IF NOT EXISTS userservice_users (
@@ -124,4 +154,6 @@ ON CONFLICT (username) DO UPDATE SET
 
 SELECT setval(pg_get_serial_sequence('category', 'id'), (SELECT max(id) FROM category));
 SELECT setval(pg_get_serial_sequence('product', 'id'), (SELECT max(id) FROM product));
+SELECT setval('shopping_cart_seq', COALESCE((SELECT max(id) FROM shopping_cart), 1));
+SELECT setval('cart_item_seq', COALESCE((SELECT max(id) FROM cart_item), 1));
 SELECT setval('userservice_users_seq', (SELECT max(id) FROM userservice_users));
