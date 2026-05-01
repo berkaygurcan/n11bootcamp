@@ -7,6 +7,7 @@ import com.n11bootcamp.user_service.repository.UserRepository;
 import com.n11bootcamp.user_service.request.SignupRequest;
 import com.n11bootcamp.user_service.request.UpdateUserRequest;
 import com.n11bootcamp.user_service.response.MessageResponse;
+import com.n11bootcamp.user_service.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,11 +35,11 @@ class UserServiceTest {
     @Mock
     private RestTemplate restTemplate;
 
-    private UserService service;
+    private UserServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new UserService();
+        service = new UserServiceImpl();
         ReflectionTestUtils.setField(service, "userRepository", userRepository);
         ReflectionTestUtils.setField(service, "restTemplate", restTemplate);
     }

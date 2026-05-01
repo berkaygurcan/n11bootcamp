@@ -4,6 +4,7 @@ import com.n11bootcamp.shopping_cart_service.entity.CartItem;
 import com.n11bootcamp.shopping_cart_service.entity.ShoppingCart;
 import com.n11bootcamp.shopping_cart_service.repository.ProductRepository;
 import com.n11bootcamp.shopping_cart_service.repository.ShoppingCartRepository;
+import com.n11bootcamp.shopping_cart_service.service.impl.ShoppingCartServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,11 +34,11 @@ class ShoppingCartServiceTest {
     @Mock
     private RestTemplate restTemplate;
 
-    private ShoppingCartService service;
+    private ShoppingCartServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new ShoppingCartService();
+        service = new ShoppingCartServiceImpl();
         ReflectionTestUtils.setField(service, "shoppingCartRepository", shoppingCartRepository);
         ReflectionTestUtils.setField(service, "productRepository", productRepository);
         ReflectionTestUtils.setField(service, "restTemplate", restTemplate);

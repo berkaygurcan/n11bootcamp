@@ -3,6 +3,7 @@ package com.n11bootcamp.stock_service.service;
 import com.n11bootcamp.stock_service.dto.DecreaseStockRequest;
 import com.n11bootcamp.stock_service.entity.ProductStock;
 import com.n11bootcamp.stock_service.repository.ProductStockRepository;
+import com.n11bootcamp.stock_service.service.impl.StockServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -24,7 +25,7 @@ class StockServiceTest {
     @Test
     void reserveStockShouldMoveAvailableQuantityToReservedQuantity() {
         ProductStock stock = new ProductStock(1L, "iPhone 15", 10);
-        StockService service = new StockService(repository);
+        StockService service = new StockServiceImpl(repository);
 
         when(repository.findById(1L)).thenReturn(Optional.of(stock));
 
@@ -38,7 +39,7 @@ class StockServiceTest {
     @Test
     void reserveStockShouldThrowWhenAvailableQuantityIsNotEnough() {
         ProductStock stock = new ProductStock(1L, "iPhone 15", 1);
-        StockService service = new StockService(repository);
+        StockService service = new StockServiceImpl(repository);
 
         when(repository.findById(1L)).thenReturn(Optional.of(stock));
 
@@ -51,7 +52,7 @@ class StockServiceTest {
     void releaseStockShouldMoveReservedQuantityBackToAvailableQuantity() {
         ProductStock stock = new ProductStock(1L, "iPhone 15", 7);
         stock.setReservedQuantity(3);
-        StockService service = new StockService(repository);
+        StockService service = new StockServiceImpl(repository);
 
         when(repository.findById(1L)).thenReturn(Optional.of(stock));
 
@@ -66,7 +67,7 @@ class StockServiceTest {
     void commitStockShouldDecreaseReservedQuantity() {
         ProductStock stock = new ProductStock(1L, "iPhone 15", 7);
         stock.setReservedQuantity(3);
-        StockService service = new StockService(repository);
+        StockService service = new StockServiceImpl(repository);
 
         when(repository.findById(1L)).thenReturn(Optional.of(stock));
 
@@ -83,7 +84,7 @@ class StockServiceTest {
         DecreaseStockRequest request = new DecreaseStockRequest();
         request.setProductId(1L);
         request.setQuantity(4);
-        StockService service = new StockService(repository);
+        StockService service = new StockServiceImpl(repository);
 
         when(repository.findById(1L)).thenReturn(Optional.of(stock));
 

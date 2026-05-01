@@ -3,6 +3,7 @@ package com.n11bootcamp.product_service.service;
 import com.n11bootcamp.product_service.dto.CategoryResponse;
 import com.n11bootcamp.product_service.entity.Product;
 import com.n11bootcamp.product_service.repository.ProductRepository;
+import com.n11bootcamp.product_service.service.impl.ProductServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -37,7 +38,7 @@ class ProductServiceTest {
     @Test
     void createProductShouldValidateCategoryAndSaveProduct() {
         Product product = product();
-        ProductService service = new ProductService(productRepository, restTemplate);
+        ProductService service = new ProductServiceImpl(productRepository, restTemplate);
 
         when(restTemplate.getForObject("http://localhost:8763/api/categories/phone", CategoryResponse.class))
                 .thenReturn(category("Phone"));
@@ -52,7 +53,7 @@ class ProductServiceTest {
 
     @Test
     void validateCategoryShouldThrowWhenCategoryKeyIsBlank() {
-        ProductService service = new ProductService(productRepository, restTemplate);
+        ProductService service = new ProductServiceImpl(productRepository, restTemplate);
 
         assertThatThrownBy(() -> service.validateCategory(" "))
                 .isInstanceOf(RuntimeException.class)
@@ -61,7 +62,7 @@ class ProductServiceTest {
 
     @Test
     void validateCategoryShouldThrowWhenCategoryNotFound() {
-        ProductService service = new ProductService(productRepository, restTemplate);
+        ProductService service = new ProductServiceImpl(productRepository, restTemplate);
 
         when(restTemplate.getForObject("http://localhost:8763/api/categories/missing", CategoryResponse.class))
                 .thenThrow(HttpClientErrorException.create(
@@ -80,7 +81,7 @@ class ProductServiceTest {
     @Test
     void getProductByIdShouldReturnProductWhenFound() {
         Product product = product();
-        ProductService service = new ProductService(productRepository, restTemplate);
+        ProductService service = new ProductServiceImpl(productRepository, restTemplate);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
@@ -100,7 +101,7 @@ class ProductServiceTest {
         updated.setColor("black");
         updated.setCategoryKey("phone");
 
-        ProductService service = new ProductService(productRepository, restTemplate);
+        ProductService service = new ProductServiceImpl(productRepository, restTemplate);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(restTemplate.getForObject("http://localhost:8763/api/categories/phone", CategoryResponse.class))
@@ -121,7 +122,7 @@ class ProductServiceTest {
     @Test
     void getPagedShouldReturnRepositoryPage() {
         Product product = product();
-        ProductService service = new ProductService(productRepository, restTemplate);
+        ProductService service = new ProductServiceImpl(productRepository, restTemplate);
 
         when(productRepository.findAll(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(product)));
@@ -133,7 +134,7 @@ class ProductServiceTest {
 
     @Test
     void deleteProductShouldDeleteWhenProductExists() {
-        ProductService service = new ProductService(productRepository, restTemplate);
+        ProductService service = new ProductServiceImpl(productRepository, restTemplate);
 
         when(productRepository.existsById(1L)).thenReturn(true);
 

@@ -3,6 +3,7 @@ package com.n11bootcamp.category_service.service;
 import com.n11bootcamp.category_service.entity.Category;
 import com.n11bootcamp.category_service.exception.ResourceNotFoundException;
 import com.n11bootcamp.category_service.repository.CategoryRepository;
+import com.n11bootcamp.category_service.service.impl.CategoryServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -25,7 +26,7 @@ class CategoryServiceTest {
     @Test
     void createShouldSaveCategory() {
         Category category = category("phone", "Phone");
-        CategoryService service = new CategoryService(repository);
+        CategoryService service = new CategoryServiceImpl(repository);
 
         when(repository.save(category)).thenReturn(category);
 
@@ -39,7 +40,7 @@ class CategoryServiceTest {
     void getAllShouldReturnCategories() {
         Category phone = category("phone", "Phone");
         Category computer = category("computer", "Computer");
-        CategoryService service = new CategoryService(repository);
+        CategoryService service = new CategoryServiceImpl(repository);
 
         when(repository.findAll()).thenReturn(List.of(phone, computer));
 
@@ -51,7 +52,7 @@ class CategoryServiceTest {
     @Test
     void getByKeyShouldReturnCategoryWhenFound() {
         Category phone = category("phone", "Phone");
-        CategoryService service = new CategoryService(repository);
+        CategoryService service = new CategoryServiceImpl(repository);
 
         when(repository.findByKey("phone")).thenReturn(Optional.of(phone));
 
@@ -63,7 +64,7 @@ class CategoryServiceTest {
 
     @Test
     void getByKeyShouldThrowWhenCategoryNotFound() {
-        CategoryService service = new CategoryService(repository);
+        CategoryService service = new CategoryServiceImpl(repository);
 
         when(repository.findByKey("missing")).thenReturn(Optional.empty());
 
