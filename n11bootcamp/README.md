@@ -165,19 +165,25 @@ http://localhost:3000
 
 Backend servisleri ve yardımcı servisler Docker Compose ile ayağa kaldırılır.
 
-Iyzico sandbox bilgileri gibi hassas değerler `.env` dosyasından okunur. Örnek dosyayı kopyalayıp kendi değerlerinle doldurabilirsin:
+Iyzico sandbox bilgileri gibi hassas değerler `.env` dosyasından okunur. Repo içinde gerçek `.env` dosyası tutulmaz; bunun yerine hangi değişkenlerin gerekli olduğunu gösteren `.env.example` dosyası vardır.
+
+Projeyi ilk kez indiren kişi önce örnek dosyayı kopyalayarak kendi local `.env` dosyasını oluşturmalıdır:
 
 ```bash
 copy .env.example .env
 ```
 
-Gerekli Iyzico değişkenleri:
+Gerçek Iyzico sandbox testi yapmak için `.env` içindeki şu alanlar kendi sandbox hesabındaki değerlerle doldurulmalıdır:
 
 ```text
 IYZICO_BASE_URL
 IYZICO_API_KEY
 IYZICO_SECRET_KEY
 ```
+
+`.env` dosyası `.gitignore` içinde olduğu için git'e eklenmez. Böylece API key ve secret key gibi bilgiler repository içinde paylaşılmaz.
+
+Iyzico keyleri girilmezse uygulama yine çalışır. Bu durumda `payment-service` gerçek Iyzico isteği atmaz ve demo için mock ödeme akışını kullanır.
 
 ```bash
 docker compose up -d
@@ -318,6 +324,8 @@ IYZICO_API_KEY
 IYZICO_SECRET_KEY
 ```
 
+Bu değerler doluysa ödeme adımında Iyzico sandbox'a istek atılır. Boş bırakılırsa uygulama demo akışını bozmamak için mock payment davranışına düşer.
+
 ## Demo Kullanıcı
 
 Demo testlerinde kullanılan kullanıcı:
@@ -368,13 +376,3 @@ password: admin
 - Docker başlangıç verileri `init.sql` ile toparlandı.
 - Unit testler eklendi.
 - Swagger UI üzerinden servis dokümantasyonu kontrol edilebilir hale getirildi.
-
-## Kalan / Geliştirilebilir Alanlar
-
-- Frontend projesinin backend repository içine taşınması
-- CI/CD pipeline eklenmesi
-- Jenkins ve GitHub Actions karşılaştırma dokümanı
-- AWS Elastic Beanstalk ve RDS deployment hazırlığı
-- Merkezi loglama veya monitoring kurulumu
-- Admin panel ile ürün/stok yönetimi
-- Daha kapsamlı integration testler
