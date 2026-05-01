@@ -1,0 +1,12 @@
+n11bootcamp-frontend/node_modules/
+n11bootcamp-frontend/dist/
+n11bootcamp-frontend/.vite/
+n11bootcamp-frontend/.env
+n11bootcamp-frontend/.env.local
+n11bootcamp-frontend/.env.*.local
+n11bootcamp-frontend/npm-debug.log*
+n11bootcamp-frontend/yarn-debug.log*
+n11bootcamp-frontend/yarn-error.log*
+n11bootcamp-frontend/pnpm-debug.log*
+
+_git_backups/
