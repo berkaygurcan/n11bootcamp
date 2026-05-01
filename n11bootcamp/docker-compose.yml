@@ -42,6 +42,11 @@ services:
       - ./docker/keycloak/microservice-realm-realm.json:/opt/keycloak/data/import/microservice-realm-realm.json:ro
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8080'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   discovery-server:
     image: n11bootcamp/discovery-server:latest
@@ -51,6 +56,11 @@ services:
       CONFIG_ENABLED: "false"
     ports:
       - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8761'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   config-server:
     image: n11bootcamp/config-server:latest
@@ -59,9 +69,14 @@ services:
       EUREKA_URI: http://discovery-server:8761/eureka
     ports:
       - "8762:8762"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8762'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       discovery-server:
-        condition: service_started
+        condition: service_healthy
 
   api-gateway:
     image: n11bootcamp/api-gateway:latest
@@ -72,11 +87,30 @@ services:
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/microservice-realm
     ports:
       - "8763:8763"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'awk \"{exit (\\$1 > 20 ? 0 : 1)}\" /proc/uptime && exec 3<>/dev/tcp/localhost/8763'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_healthy
       keycloak:
-        condition: service_started
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      shopping-cart-service:
+        condition: service_healthy
+      category-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      stock-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
 
   product-service:
     image: n11bootcamp/product-service:latest
@@ -89,9 +123,14 @@ services:
       SPRING_DATASOURCE_PASSWORD: 1234
     ports:
       - "8764:8764"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8764'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
 
@@ -106,9 +145,14 @@ services:
       SPRING_DATASOURCE_PASSWORD: 1234
     ports:
       - "8765:8765"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8765'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
 
@@ -124,13 +168,18 @@ services:
       JWT_ISSUER_URI: http://keycloak:8080/realms/microservice-realm/protocol/openid-connect/token
     ports:
       - "8766:8766"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'awk \"{exit (\\$1 > 20 ? 0 : 1)}\" /proc/uptime && exec 3<>/dev/tcp/localhost/8766'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
       keycloak:
-        condition: service_started
+        condition: service_healthy
 
   order-service:
     image: n11bootcamp/order-service:latest
@@ -147,9 +196,14 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
     ports:
       - "8767:8767"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8767'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
       rabbitmq:
@@ -167,9 +221,14 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
     ports:
       - "8768:8768"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8768'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
 
@@ -188,9 +247,14 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
     ports:
       - "8769:8769"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8769'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
       rabbitmq:
@@ -209,9 +273,14 @@ services:
       DB_PASSWORD: 1234
     ports:
       - "8770:8770"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8770'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       config-server:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
 
