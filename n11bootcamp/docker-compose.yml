@@ -1,0 +1,219 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: n11-postgres
+    environment:
+      POSTGRES_DB: n11bootcamp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d n11bootcamp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: n11-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: n11-keycloak
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    volumes:
+      - ./docker/keycloak/microservice-realm-realm.json:/opt/keycloak/data/import/microservice-realm-realm.json:ro
+    ports:
+      - "8080:8080"
+
+  discovery-server:
+    image: n11bootcamp/discovery-server:latest
+    container_name: n11-discovery-server
+    environment:
+      EUREKA_HOSTNAME: discovery-server
+      CONFIG_ENABLED: "false"
+    ports:
+      - "8761:8761"
+
+  config-server:
+    image: n11bootcamp/config-server:latest
+    container_name: n11-config-server
+    environment:
+      EUREKA_URI: http://discovery-server:8761/eureka
+    ports:
+      - "8762:8762"
+    depends_on:
+      discovery-server:
+        condition: service_started
+
+  api-gateway:
+    image: n11bootcamp/api-gateway:latest
+    container_name: n11-api-gateway
+    environment:
+      CONFIG_URI: http://config-server:8762
+      EUREKA_URI: http://discovery-server:8761/eureka
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/microservice-realm
+    ports:
+      - "8763:8763"
+    depends_on:
+      config-server:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+  product-service:
+    image: n11bootcamp/product-service:latest
+    container_name: n11-product-service
+    environment:
+      CONFIG_URI: http://config-server:8762
+      EUREKA_URI: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/n11bootcamp
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+    ports:
+      - "8764:8764"
+    depends_on:
+      config-server:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+
+  shopping-cart-service:
+    image: n11bootcamp/shopping-cart-service:latest
+    container_name: n11-shopping-cart-service
+    environment:
+      CONFIG_URI: http://config-server:8762
+      EUREKA_URI: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/n11bootcamp
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+    ports:
+      - "8765:8765"
+    depends_on:
+      config-server:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+
+  user-service:
+    image: n11bootcamp/user-service:latest
+    container_name: n11-user-service
+    environment:
+      CONFIG_URI: http://config-server:8762
+      EUREKA_URI: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/n11bootcamp
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+      JWT_ISSUER_URI: http://keycloak:8080/realms/microservice-realm/protocol/openid-connect/token
+    ports:
+      - "8766:8766"
+    depends_on:
+      config-server:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  order-service:
+    image: n11bootcamp/order-service:latest
+    container_name: n11-order-service
+    environment:
+      CONFIG_URI: http://config-server:8762
+      EUREKA_URI: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/n11bootcamp
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    ports:
+      - "8767:8767"
+    depends_on:
+      config-server:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  payment-service:
+    image: n11bootcamp/payment-service:latest
+    container_name: n11-payment-service
+    environment:
+      CONFIG_URI: http://config-server:8762
+      EUREKA_URI: http://discovery-server:8761/eureka
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    ports:
+      - "8768:8768"
+    depends_on:
+      config-server:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  stock-service:
+    image: n11bootcamp/stock-service:latest
+    container_name: n11-stock-service
+    environment:
+      CONFIG_URI: http://config-server:8762
+      EUREKA_URI: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/n11bootcamp
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    ports:
+      - "8769:8769"
+    depends_on:
+      config-server:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  category-service:
+    image: n11bootcamp/category-service:latest
+    container_name: n11-category-service
+    environment:
+      CONFIG_URI: http://config-server:8762
+      EUREKA_URI: http://discovery-server:8761/eureka
+      DB_HOST: postgres
+      DB_PORT: 5432
+      CATEGORY_DB_NAME: n11bootcamp
+      DB_USERNAME: postgres
+      DB_PASSWORD: 1234
+    ports:
+      - "8770:8770"
+    depends_on:
+      config-server:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  rabbitmq-data:
