@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
+import Topbar from "./components/Topbar/Topbar";
 import { getCartByName } from "./services/api";
 import { getCurrentUsername } from "./services/cartStorage";
 
 export default function App() {
   const [username, setUsername] = useState(() => getCurrentUsername());
   const [cartCount, setCartCount] = useState(0);
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   useEffect(() => {
     async function syncAppState() {
@@ -43,27 +50,19 @@ export default function App() {
     window.dispatchEvent(new Event("storage"));
   }
 
+  function toggleTheme() {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  }
+
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <Link className="brand" to="/products">n11 Demo</Link>
-        <nav className="nav-links">
-          <Link to="/products">Products</Link>
-          <Link to="/cart">Cart ({cartCount})</Link>
-          {username && <Link to="/orders">Orders</Link>}
-          {username ? (
-            <>
-              <span className="username">{username}</span>
-              <button className="link-button" onClick={handleLogout}>Logout</button>
-            </>
-          ) : (
-            <>
-              <Link to="/login">Login</Link>
-              <Link className="nav-cta" to="/register">Register</Link>
-            </>
-          )}
-        </nav>
-      </header>
+      <Topbar 
+        username={username} 
+        cartCount={cartCount} 
+        theme={theme} 
+        toggleTheme={toggleTheme} 
+        handleLogout={handleLogout} 
+      />
       <main className="page">
         <Outlet />
       </main>

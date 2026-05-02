@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ProductCard from "../components/ProductCard/ProductCard";
 import { getCategories, getPagedProducts, getProducts } from "../services/api";
 
 const PAGE_SIZE = 8;
@@ -9,6 +10,7 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState([]);
   const [categoryKey, setCategoryKey] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [pageInfo, setPageInfo] = useState({
     page: 0,
     totalPages: 0,
@@ -33,14 +35,23 @@ export default function ProductsPage() {
   }, []);
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setPageInfo((current) => ({ ...current, page: 0 }));
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  useEffect(() => {
     async function loadProducts() {
       setLoading(true);
       setError("");
 
       try {
-        if (categoryKey || searchTerm.trim()) {
+        if (categoryKey || debouncedSearchTerm.trim()) {
           const data = await getProducts();
-          const normalizedSearch = searchTerm.trim().toLowerCase();
+          const normalizedSearch = debouncedSearchTerm.trim().toLowerCase();
           const filteredProducts = (Array.isArray(data) ? data : [])
             .filter((product) => !categoryKey || product.categoryKey === categoryKey)
             .filter((product) => {
@@ -78,7 +89,7 @@ export default function ProductsPage() {
     }
 
     loadProducts();
-  }, [pageInfo.page, categoryKey, searchTerm]);
+  }, [pageInfo.page, categoryKey, debouncedSearchTerm]);
 
   function goToPage(nextPage) {
     setPageInfo((current) => ({
@@ -97,10 +108,6 @@ export default function ProductsPage() {
 
   function handleSearchChange(event) {
     setSearchTerm(event.target.value);
-    setPageInfo((current) => ({
-      ...current,
-      page: 0
-    }));
   }
 
   return (
@@ -154,18 +161,7 @@ export default function ProductsPage() {
 
       <div className="product-grid">
         {products.map((product) => (
-          <Link className="product-card" key={product.id} to={`/products/${product.id}`}>
-            {product.img ? (
-              <img src={product.img} alt={product.title || product.brand || "Product"} />
-            ) : (
-              <div className="product-image-placeholder">No image</div>
-            )}
-            <div className="product-info">
-              <h2>{product.title || "Untitled product"}</h2>
-              <p>{product.brand || product.category || "Product"}</p>
-              <strong>{product.price} TL</strong>
-            </div>
-          </Link>
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
 

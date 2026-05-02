@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import EmptyState from "../components/EmptyState/EmptyState";
+import CartItem from "../components/CartItem/CartItem";
 import {
   getCartByName,
   getOrCreateCart,
@@ -87,46 +89,25 @@ export default function CartPage() {
       </div>
 
       {!username ? (
-        <div className="empty-state">
-          <p>Please login to use your cart.</p>
-          <Link to="/login">Login</Link>
-        </div>
+        <EmptyState type="auth" title="Login Required" message="Please login to use your cart." actionLink="/login" actionText="Login" />
       ) : cart.length === 0 ? (
-        <div className="empty-state">
-          {cartLoading && <p>Loading cart...</p>}
-          {!cartLoading && cartError && <p>{cartError}</p>}
-          {!cartLoading && !cartError && <p>Your cart is empty.</p>}
-          <Link to="/products">Go to products</Link>
-        </div>
+        cartLoading ? (
+          <div className="empty-state"><p>Loading cart...</p></div>
+        ) : cartError ? (
+          <div className="empty-state"><p>{cartError}</p></div>
+        ) : (
+          <EmptyState type="cart" title="Cart Empty" message="Your cart is empty." actionLink="/products" actionText="Go to products" />
+        )
       ) : (
         <div className="cart-layout">
           <div className="cart-items">
             {cart.map((item) => (
-              <article className="cart-item" key={item.productId}>
-                <div>
-                  <h2>{item.productName}</h2>
-                  <p>{item.price} TL each</p>
-                </div>
-
-                <div className="cart-actions">
-                  <input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(event) =>
-                      changeQuantity(item.productId, Number(event.target.value))
-                    }
-                  />
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    onClick={() => removeItem(item.productId)}
-                  >
-                    Remove
-                  </button>
-                  <strong>{item.price * item.quantity} TL</strong>
-                </div>
-              </article>
+              <CartItem 
+                key={item.productId} 
+                item={item} 
+                onQuantityChange={changeQuantity} 
+                onRemove={removeItem} 
+              />
             ))}
           </div>
 

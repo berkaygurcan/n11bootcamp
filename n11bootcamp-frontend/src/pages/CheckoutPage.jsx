@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import EmptyState from "../components/EmptyState/EmptyState";
 import { createOrder, getOrCreateCart, getOrders, removeCartItem } from "../services/api";
 import { getCurrentUsername, notifyCartChanged } from "../services/cartStorage";
 
@@ -148,10 +149,7 @@ export default function CheckoutPage() {
   if (!username) {
     return (
       <section className="content-panel">
-        <div className="empty-state">
-          <p>Please login to checkout.</p>
-          <Link to="/login">Login</Link>
-        </div>
+        <EmptyState type="auth" title="Login Required" message="Please login to checkout." actionLink="/login" actionText="Login" />
       </section>
     );
   }
@@ -186,10 +184,13 @@ export default function CheckoutPage() {
       )}
 
       {!loading && cart.length === 0 && (
-        <div className="empty-state">
-          <p>{message?.completed ? "Your cart has been cleared." : "Your cart is empty."}</p>
-          <Link to="/products">Go to products</Link>
-        </div>
+        <EmptyState 
+          type="cart" 
+          title="Cart Empty" 
+          message={message?.completed ? "Your cart has been cleared." : "Your cart is empty."} 
+          actionLink={message?.completed ? undefined : "/products"} 
+          actionText={message?.completed ? undefined : "Go to products"} 
+        />
       )}
 
       {!loading && cart.length > 0 && (
